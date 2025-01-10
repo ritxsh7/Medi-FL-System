@@ -1,0 +1,91 @@
+2025-01-10 19:35:10.448974: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-01-10 19:35:11.514267: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+C:\Users\rites\anaconda3\Lib\site-packages\keras\src\layers\reshaping\flatten.py:37: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+  super().__init__(**kwargs)
+2025-01-10 19:35:15.174195: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[93mWARNING [0m:   DEPRECATED FEATURE: flwr.client.start_numpy_client() is deprecated. 
+	Instead, use `flwr.client.start_client()` by ensuring you first call the `.to_client()` method as shown below: 
+	flwr.client.start_client(
+		server_address='<IP>:<PORT>',
+		client=FlowerClient().to_client(), # <-- where FlowerClient is of type flwr.client.NumPyClient object
+	)
+	Using `start_numpy_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-01-10 19:35:15,304 - DEPRECATED FEATURE: flwr.client.start_numpy_client() is deprecated. 
+	Instead, use `flwr.client.start_client()` by ensuring you first call the `.to_client()` method as shown below: 
+	flwr.client.start_client(
+		server_address='<IP>:<PORT>',
+		client=FlowerClient().to_client(), # <-- where FlowerClient is of type flwr.client.NumPyClient object
+	)
+	Using `start_numpy_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+[93mWARNING [0m:   DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-01-10 19:35:15,305 - DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-01-10 19:35:15,318 - Opened insecure gRPC connection (no certificates were passed)
+2025-01-10 19:35:15,327 - ChannelConnectivity.IDLE
+2025-01-10 19:35:15,327 - ChannelConnectivity.CONNECTING
+2025-01-10 19:35:15,332 - ChannelConnectivity.READY
+Traceback (most recent call last):
+  File "C:\Users\rites\anaconda3\Lib\site-packages\flwr\client\grpc_client\connection.py", line 243, in grpc_connection
+    channel.close()
+  File "C:\Users\rites\anaconda3\Lib\site-packages\grpc\_channel.py", line 2250, in close
+    self._close()
+  File "C:\Users\rites\anaconda3\Lib\site-packages\grpc\_channel.py", line 2231, in _close
+    self._channel.close(cygrpc.StatusCode.cancelled, "Channel closed!")
+  File "src\\python\\grpcio\\grpc\\_cython\\_cygrpc/channel.pyx.pxi", line 576, in grpc._cython.cygrpc.Channel.close
+  File "src\\python\\grpcio\\grpc\\_cython\\_cygrpc/channel.pyx.pxi", line 461, in grpc._cython.cygrpc._close
+  File "src\\python\\grpcio\\grpc\\_cython\\_cygrpc/channel.pyx.pxi", line 484, in grpc._cython.cygrpc._close
+  File "C:\Users\rites\anaconda3\Lib\threading.py", line 355, in wait
+    waiter.acquire()
+  File "C:\Users\rites\anaconda3\Lib\site-packages\flwr\client\app.py", line 823, in signal_handler
+    raise StopIteration from None
+StopIteration
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\BE Project\application\fl-app\client.py", line 61, in <module>
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
+  File "C:\Users\rites\anaconda3\Lib\site-packages\flwr\client\app.py", line 739, in start_numpy_client
+    start_client(
+  File "C:\Users\rites\anaconda3\Lib\site-packages\flwr\client\app.py", line 200, in start_client
+    start_client_internal(
+  File "C:\Users\rites\anaconda3\Lib\site-packages\flwr\client\app.py", line 399, in start_client_internal
+    with connection(
+         ^^^^^^^^^^^
+  File "C:\Users\rites\anaconda3\Lib\contextlib.py", line 144, in __exit__
+    next(self.gen)
+RuntimeError: generator raised StopIteration
