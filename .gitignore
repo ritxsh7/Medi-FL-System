@@ -1,5 +1,6 @@
 classification-data
 opg-data
+data
 node_modules
 .env
 __pycache__

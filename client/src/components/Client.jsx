@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import socketIOClient from "socket.io-client";
 
 const Client = () => {
   const [dataPath, setDataPath] = useState("");
@@ -15,7 +16,8 @@ const Client = () => {
   };
 
   const joinServer = async () => {
-    await fetch("http://localhost:5001/join-server", { method: "POST" });
+    const socket = socketIOClient("http://localhost:5000");
+    socket.emit("join_server");
     alert("Joined server!");
   };
 

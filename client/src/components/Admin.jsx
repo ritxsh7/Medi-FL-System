@@ -1,34 +1,49 @@
-import React, { useState, useEffect } from "react";
-import socketIOClient from "socket.io-client";
+import React, { useEffect, useState } from "react";
+import io from "socket.io-client";
 
-const Admin = () => {
-  const [metrics, setMetrics] = useState([]);
+const socket = io("http://127.0.0.1:5000");
+
+const LogViewer = () => {
+  const [serverLogs, setServerLogs] = useState("");
+  const [clientLogs, setClientLogs] = useState({});
 
   useEffect(() => {
-    const socket = socketIOClient("http://localhost:5000");
-    socket.on("update_metrics", (metric) => {
-      setMetrics((prev) => [...prev, metric]);
+    // Listen for server logs
+    socket.on("server_log", (data) => {
+      setServerLogs((prev) => prev + data.log);
     });
-    return () => socket.disconnect();
-  }, []);
 
-  const startServer = async () => {
-    await fetch("http://localhost:5000/start-server", { method: "POST" });
-    alert("Server started!");
-  };
+    // Listen for client logs
+    for (let clientId = 1; clientId <= 2; clientId++) {
+      socket.on(`client_${clientId}_log`, (data) => {
+        setClientLogs((prev) => ({
+          ...prev,
+          [clientId]: (prev[clientId] || "") + data.log,
+        }));
+      });
+    }
+
+    return () => {
+      socket.off("server_log");
+      for (let clientId = 1; clientId <= 2; clientId++) {
+        socket.off(`client_${clientId}_log`);
+      }
+    };
+  }, []);
 
   return (
     <div>
-      <h1>Admin Dashboard</h1>
-      <button onClick={startServer}>Start Server</button>
-      <h2>Metrics</h2>
-      <ul>
-        {metrics.map((m, index) => (
-          <li key={index}>{JSON.stringify(m)}</li>
-        ))}
-      </ul>
+      <h2>Server Logs</h2>
+      <pre>{serverLogs}</pre>
+      <h2>Client Logs</h2>
+      {Object.keys(clientLogs).map((clientId) => (
+        <div key={clientId}>
+          <h3>Client {clientId}</h3>
+          <pre>{clientLogs[clientId]}</pre>
+        </div>
+      ))}
     </div>
   );
 };
 
-export default Admin;
+export default LogViewer;
