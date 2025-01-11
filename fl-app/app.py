@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 import subprocess
 import threading
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")  # Use gevent as async mode
 
 # Global variables to store server and client processes
@@ -21,7 +24,6 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s]: %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
     ],
@@ -67,6 +69,7 @@ def start_clients():
     for client_id in range(1, num_clients + 1):
         def stream_client_logs(client_id):
             for line in iter(process.stdout.readline, b""):
+                # print(line)
                 socketio.emit(f"client_{client_id}_log", {"log": line.decode()},  to=None)
 
         process = subprocess.Popen(
