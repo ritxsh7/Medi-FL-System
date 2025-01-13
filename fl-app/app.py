@@ -38,14 +38,14 @@ def start_server():
     if server_process:
         return jsonify({"status": "error", "message": "Server already running"}), 400
 
+# Server logs streaming
     def stream_server_logs():
-        # Stream logs to the web interface
         for line in iter(server_process.stdout.readline, b""):
             socketio.emit("server_log", {"log": line.decode()}, to=None)
 
     # Start the Flower server
     server_process = subprocess.Popen(
-        ["python", "server.py"],
+        ["python", "framework/server.py"],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         bufsize=1
@@ -73,7 +73,7 @@ def start_clients():
                 socketio.emit(f"client_{client_id}_log", {"log": line.decode()},  to=None)
 
         process = subprocess.Popen(
-            ["python", "client.py", f"--client_id={client_id}"],
+            ["python", "framework/client.py", f"--client_id={client_id}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             bufsize=1
