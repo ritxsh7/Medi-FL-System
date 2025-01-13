@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { useParams } from "react-router-dom";
 import { cleanLogText } from "../utils/ui";
+import LineChart from "./LineChart";
+import LogsDisplay from "./LogsDisplay";
 
 const socket = io("http://127.0.0.1:5000");
 
@@ -12,14 +14,14 @@ const ClientUI = () => {
   const [clientLogs, setClientLogs] = useState("");
   const [trainingLogs, setTrainingLogs] = useState([]);
   const [validationLogs, setValidationLogs] = useState([]);
-  console.log(trainingLogs);
-  console.log(validationLogs);
+  // console.log(trainingLogs);
+  // console.log(validationLogs);
 
   const [status, setStatus] = useState("Waiting for server...");
 
   // Parsing id from the parameter (temporary)
   const { id } = useParams();
-  console.log(id);
+  // console.log(id);
 
   // Pattern matching
   const trainingLogPattern =
@@ -85,14 +87,13 @@ const ClientUI = () => {
             <p className="text-sm text-gray-700">{status}</p>
           </div>
         </div>
-
+        <div>
+          <LineChart metrics={trainingLogs} />
+          <LineChart metrics={validationLogs} />
+        </div>
         <div>
           <h2 className="text-lg font-semibold text-gray-800 mb-2">Logs</h2>
-          <div className="p-4 bg-gray-800 border border-gray-600 rounded h-64 overflow-y-auto">
-            <pre className="text-sm text-left text-green-400 whitespace-pre-wrap">
-              {clientLogs}
-            </pre>
-          </div>
+          <LogsDisplay logs={clientLogs} />
         </div>
       </div>
     </div>

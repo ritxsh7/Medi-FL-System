@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { cleanLogText } from "../utils/ui";
 import axios from "axios";
+import LineChart from "./LineChart";
+import LogsDisplay from "./LogsDisplay";
 
 const socket = io("http://127.0.0.1:5000");
 
@@ -11,7 +13,6 @@ const AdminUI = () => {
   const [serverLogs, setServerLogs] = useState("");
   const [messages, setMessages] = useState("");
   const [structuredLogs, setStructuredLogs] = useState([]);
-  console.log(structuredLogs);
 
   useEffect(() => {
     // Join the admin room
@@ -87,14 +88,13 @@ const AdminUI = () => {
         </div>
 
         <div>
+          <LineChart metrics={structuredLogs} />
+        </div>
+        <div>
           <h2 className="text-lg font-semibold text-gray-800 mb-2">
             Server Logs
           </h2>
-          <div className="p-4 bg-gray-800 border border-gray-600 rounded h-64 overflow-y-auto">
-            <pre className="text-sm text-left text-lime-500 whitespace-pre-wrap">
-              {serverLogs}
-            </pre>
-          </div>
+          <LogsDisplay logs={serverLogs} />
         </div>
       </div>
     </div>
