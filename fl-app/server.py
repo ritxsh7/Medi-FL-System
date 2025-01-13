@@ -65,7 +65,7 @@ def get_eval_fn(model):
     ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
         model.set_weights(parameters) 
         loss, accuracy = model.evaluate(test_gen)
-        print("After round {}, Global accuracy = {} ".format(server_round,accuracy))
+        print("After round {}, Global accuracy = {}, Loss = {}".format(server_round,accuracy, loss))
         results = {"round":server_round,"loss": loss, "accuracy": accuracy}
         results_list.append(results)
         return loss, {"accuracy": accuracy}

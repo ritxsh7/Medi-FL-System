@@ -89,13 +89,14 @@ class FlwrClient(fl.client.NumPyClient):
         self.model.set_weights(parameters)
         history = self.model.fit(self.train_gen, epochs = 1)
         results = {"loss": history.history["loss"][0], "accuracy": history.history["accuracy"][0]}
-        print("Local Training Metrics on client 1: {}".format(results))
+        print("Training Metrics, Accuracy = {}, Loss = {}".format(results['accuracy'], results['loss']))
         results_list.append(results)
         return self.model.get_weights(), len(self.train_gen),results
 
     def evaluate(self, parameters, config):
         self.model.set_weights(parameters)
         loss, accuracy = self.model.evaluate(self.test_gen)
+        print("Validation Metrics, Accuracy = {}, Loss = {}".format(accuracy, loss))
         num_examples_test = len(self.test_gen)
         return loss, num_examples_test, {"accuracy": accuracy}
     
