@@ -4,8 +4,6 @@ from tensorflow.keras.optimizers import Adamax
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from utils import create_model
 from typing import Dict, Optional, Tuple
-
-
 import sys
 import io
 import logging
@@ -22,8 +20,6 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 
-# Disable Flower's default logging
-
 # Create the logger
 fl_logger = logging.getLogger("flwr")
 fl_logger.setLevel(logging.INFO)
@@ -36,7 +32,6 @@ class NoWarningsFilter(logging.Filter):
 
 console_handler.addFilter(NoWarningsFilter())
 fl_logger.addHandler(console_handler)
-
 
 
 # Create a test generator for evaluation
@@ -55,7 +50,7 @@ results_list = []
 
 # Define evaluation function for server-side evaluation
 def get_eval_fn(model):
-    test_dir = "data/Testing"
+    test_dir = "../data/Testing"
     test_gen = create_test_generator(test_dir)
 
     def evaluate(

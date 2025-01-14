@@ -18,8 +18,8 @@ def create_model():
     return model
 
 
-train_dir = "data/Training"
-test_dir = "data/Testing"
+train_dir = "../data/Training"
+test_dir = "../data/Testing"
 
 
 def load_data(dir):
