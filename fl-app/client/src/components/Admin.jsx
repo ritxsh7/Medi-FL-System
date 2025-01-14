@@ -44,14 +44,19 @@ const AdminUI = () => {
   }, []);
 
   const startServer = async () => {
-    const response = await axios.post("http://127.0.0.1:5000/start_server");
+    const response = await axios.post(
+      "http://localhost:5000/server/start_server"
+    );
     setMessages((msg) => msg + "\n" + response.data.message);
   };
 
   const startTraining = async () => {
-    const response = await axios.post("http://127.0.0.1:5000/start_clients", {
-      num_clients: 2,
-    });
+    const response = await axios.post(
+      "http://127.0.0.1:5000/client/start_clients",
+      {
+        num_clients: 2,
+      }
+    );
     setMessages((msg) => msg + "\n" + response.data.message);
   };
 

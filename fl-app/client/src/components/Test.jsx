@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 
@@ -5,6 +6,11 @@ const socket = io("http://127.0.0.1:5000");
 
 const cleanLogText = (log) => {
   return log.replace(/\x1b\[[0-9;]*m/g, " | ");
+};
+
+const checkWorking = async () => {
+  const res = await axios.get("http://127.0.0.1:5000/");
+  console.log(res);
 };
 
 const App = () => {
@@ -37,6 +43,7 @@ const App = () => {
 
   return (
     <div>
+      <button onClick={checkWorking}>Check working</button>
       <div>
         <h3>Server Logs</h3>
         <pre>{serverLogs}</pre>
