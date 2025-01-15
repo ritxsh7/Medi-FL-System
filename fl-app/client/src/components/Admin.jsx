@@ -9,6 +9,7 @@ const socket = io("http://127.0.0.1:5000");
 
 const AdminUI = () => {
   /*AdminUI component here */
+  document.title = "Admin interface";
 
   const [serverLogs, setServerLogs] = useState("");
   const [messages, setMessages] = useState("");
