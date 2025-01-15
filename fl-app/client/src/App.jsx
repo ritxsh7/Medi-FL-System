@@ -8,6 +8,7 @@ import SignupPage from "./pages/SignupPage";
 import Header from "./components/Header";
 import ProtectedPage from "./pages/ProtectedPage";
 import RedirectPage from "./pages/RedirectPage";
+import ClientDashboardPage from "./pages/ClientDashboardPage";
 
 const App = () => {
   return (
@@ -39,7 +40,7 @@ const App = () => {
           path="/client/:id"
           element={
             <ProtectedPage role="client">
-              <ClientUI />
+              <ClientDashboardPage />
             </ProtectedPage>
           }
         />
