@@ -6,17 +6,43 @@ import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import Header from "./components/Header";
+import ProtectedPage from "./pages/ProtectedPage";
+import RedirectPage from "./pages/RedirectPage";
 
 const App = () => {
   return (
     <Router>
       <Header />
       <Routes>
-        <Route exact path="/" element={<LoginPage />} />
+        <Route
+          exact
+          path="/"
+          element={
+            <RedirectPage>
+              <LoginPage />
+            </RedirectPage>
+          }
+        />
         <Route exact path="/signup" element={<SignupPage />} />
-        <Route exact path="/admin" element={<AdminUI />} />
+        <Route
+          exact
+          path="/admin"
+          element={
+            <ProtectedPage role="admin">
+              <AdminUI />
+            </ProtectedPage>
+          }
+        />
         <Route exact path="/test" element={<Test />} />
-        <Route exact path="/client/:id" element={<ClientUI />} />
+        <Route
+          exact
+          path="/client/:id"
+          element={
+            <ProtectedPage role="client">
+              <ClientUI />
+            </ProtectedPage>
+          }
+        />
       </Routes>
     </Router>
   );
