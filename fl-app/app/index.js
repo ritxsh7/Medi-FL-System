@@ -1,10 +1,17 @@
 const express = require("express");
 const cors = require("cors");
-const serverRoutes = require("./routes/serverRoutes.js");
-const clientRoutes = require("./routes/clientRoutes.js");
+const dotenv = require("dotenv");
 const http = require("http");
 const { Server } = require("socket.io");
 const { initialize } = require("./utils/processes.js");
+
+// Custom modules
+const connection = require("./config/db.js");
+const serverRoutes = require("./routes/serverRoutes.js");
+const clientRoutes = require("./routes/clientRoutes.js");
+const authRoutes = require("./routes/authRoutes.js");
+
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -31,12 +38,15 @@ app.use(
   })
 );
 app.use(express.json());
-app.get("/", (_, res) => res.send("working"));
+
+// Routes
+app.use("/auth", authRoutes);
 app.use("/server", serverRoutes);
 app.use("/client", clientRoutes);
 
-const PORT = 5000;
+// Database connection
+connection(process.env.MONGODB_URI);
 
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+server.listen(process.env.APP_PORT, () => {
+  console.log(`Server running on port ${process.env.APP_PORT}`);
 });
