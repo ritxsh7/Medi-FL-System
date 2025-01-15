@@ -1,15 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthForm from "../components/AuthForm";
+import axios from "axios";
 
 const SignupPage = () => {
   const navigate = useNavigate();
 
-  const handleSignup = (e) => {
-    e.preventDefault();
+  const [formData, setFormData] = useState({
+    accessId: "",
+    password: "",
+    role: "",
+  });
 
-    // Navigate to client dashboard
-    navigate("/");
+  const [message, setMessage] = useState("");
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_APP_SERVER_URL}/auth/signup`,
+        formData
+      );
+      setMessage(response.data.message);
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+      setMessage(error.response.data.message);
+    }
   };
 
   return (
@@ -17,8 +34,12 @@ const SignupPage = () => {
       <AuthForm
         title="Sign Up"
         buttonLabel="Sign Up"
+        formType="signup"
         onSubmit={handleSignup}
+        formData={formData}
+        setFormData={setFormData}
         linkText="Already have an account? Log in"
+        message={message}
         linkAction={() => navigate("/")}
       />
     </div>

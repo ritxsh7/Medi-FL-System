@@ -1,15 +1,14 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
-const ProtectedRoute = ({ role, component: Component }) => {
+const ProtectedRoute = ({ role, children }) => {
   const token = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
+  const cookies = JSON.parse(localStorage.getItem("cookies"));
 
-  if (!token || userRole !== role) {
+  if (!token || cookies.role !== role) {
     return <Navigate to="/" />;
   }
-
-  return <Component />;
+  return children;
 };
 
 export default ProtectedRoute;
