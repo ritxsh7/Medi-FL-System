@@ -9,6 +9,8 @@ import Header from "./components/Header";
 import ProtectedPage from "./pages/ProtectedPage";
 import RedirectPage from "./pages/RedirectPage";
 import ClientDashboardPage from "./pages/ClientDashboardPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import SessionPage from "./pages/SessionPage";
 
 const App = () => {
   return (
@@ -30,11 +32,10 @@ const App = () => {
           path="/admin"
           element={
             <ProtectedPage role="admin">
-              <AdminUI />
+              <AdminDashboardPage />
             </ProtectedPage>
           }
         />
-        <Route exact path="/test" element={<Test />} />
         <Route
           exact
           path="/client/:id"
@@ -44,6 +45,8 @@ const App = () => {
             </ProtectedPage>
           }
         />
+        <Route exact path="/session" element={<SessionPage />} />
+        <Route exact path="/test" element={<Test />} />
       </Routes>
     </Router>
   );
