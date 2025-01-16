@@ -1,38 +1,50 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-const ClientJoinModal = ({ setIsModalOpen }) => {
-  const [sessionId, setSessionId] = useState("");
+const AdminCreateModal = ({ setIsModalOpen }) => {
+  const [sessionName, setSessionName] = useState("");
+  const [numClients, setNumClients] = useState();
+  const navigate = useNavigate();
   const { id } = JSON.parse(localStorage.getItem("cookies"));
 
-  const handleJoinSession = async (e) => {
+  const handleCreateSession = async (e) => {
     e.preventDefault();
-    const body = { sessionId, clientId: id };
+    const body = { name: sessionName, numClients, adminId: id };
     try {
       const response = await axios.post(
-        "http://localhost:5000/server/join-session",
+        "http://localhost:5000/server/create-session",
         body
       );
-      alert(response.data.message);
+      const { session, message } = response.data;
+      alert(message);
+      navigate(`/session?id=${session._id}`);
       setIsModalOpen(false);
     } catch (error) {
       console.log(error);
     }
-    setIsModalOpen(false);
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <div className="bg-white rounded-md shadow-lg p-6 w-96">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Join a New Session
+          Create a New Session
         </h2>
         <input
           type="text"
-          placeholder="Enter Session ID"
-          value={sessionId}
+          placeholder="Enter Session Name"
+          value={sessionName}
           required
-          onChange={(e) => setSessionId(e.target.value)}
+          onChange={(e) => setSessionName(e.target.value)}
+          className="w-full text-sm px-4 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 mb-4"
+        />
+        <input
+          type="text"
+          placeholder="Enter no of clients"
+          value={numClients}
+          required
+          onChange={(e) => setNumClients(e.target.value)}
           className="w-full text-sm px-4 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 mb-4"
         />
         <div className="flex justify-between space-x-4 text-sm">
@@ -43,10 +55,10 @@ const ClientJoinModal = ({ setIsModalOpen }) => {
             Cancel
           </button>
           <button
-            onClick={handleJoinSession}
+            onClick={handleCreateSession}
             className="px-4 py-2 bg-blue-600 text-white rounded-md w-3/5 hover:bg-blue-700"
           >
-            Join
+            Create
           </button>
         </div>
       </div>
@@ -54,4 +66,4 @@ const ClientJoinModal = ({ setIsModalOpen }) => {
   );
 };
 
-export default ClientJoinModal;
+export default AdminCreateModal;
