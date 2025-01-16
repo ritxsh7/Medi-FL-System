@@ -5,7 +5,7 @@ let clientProcesses = [];
 
 let ioInstance;
 
-const initialize = (io) => {
+const initializeProcessIO = (io) => {
   ioInstance = io;
 };
 
@@ -84,5 +84,5 @@ module.exports = {
   startServerProcess,
   startClientProcesses,
   stopAllProcesses,
-  initialize,
+  initializeProcessIO,
 };

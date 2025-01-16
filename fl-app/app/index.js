@@ -3,11 +3,14 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const http = require("http");
 const { Server } = require("socket.io");
-const { initialize } = require("./utils/processes.js");
+const { initializeProcessIO } = require("./utils/processes.js");
 
 // Custom modules
 const connection = require("./config/db.js");
-const serverRoutes = require("./routes/serverRoutes.js");
+const {
+  serverRoutes,
+  initializeServerIO,
+} = require("./routes/serverRoutes.js");
 const clientRoutes = require("./routes/clientRoutes.js");
 const authRoutes = require("./routes/authRoutes.js");
 
@@ -23,10 +26,11 @@ const io = new Server(server, {
 });
 
 // Initialize io
-initialize(io);
+initializeProcessIO(io);
+initializeServerIO(io);
 
-io.on("connection", (_) => {
-  console.log("Client connected");
+io.on("connection", (conn) => {
+  console.log("Client connected with from ", conn.handshake.headers.origin);
 });
 
 // Middlewares
