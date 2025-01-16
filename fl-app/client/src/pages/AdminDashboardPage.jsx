@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import SessionCard from "../components/SessionCard";
-import ClientJoinModal from "../components/ClientJoinModal";
-import { useState } from "react";
+import AdminCreateModal from "../components/AdminCreateModal";
 
-const ClientDashboardPage = () => {
-  document.title = "Client Interface";
+const AdminDashboardPage = () => {
+  document.title = "Admin interface";
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const sessions = [
     {
       id: 1,
@@ -30,11 +31,6 @@ const ClientDashboardPage = () => {
       },
     },
   ];
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
 
   return (
     <div className="min-h-screen bg-blue-50 p-8">
@@ -55,9 +51,11 @@ const ClientDashboardPage = () => {
         </h1>
         <button
           className="text-sm px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
-          onClick={handleOpenModal}
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
         >
-          + Join New Session
+          + Create New Session
         </button>
       </header>
 
@@ -68,10 +66,9 @@ const ClientDashboardPage = () => {
         ))}
       </div>
 
-      {/* Modal */}
-      {isModalOpen && <ClientJoinModal setIsModalOpen={setIsModalOpen} />}
+      {isModalOpen && <AdminCreateModal setIsModalOpen={setIsModalOpen} />}
     </div>
   );
 };
 
-export default ClientDashboardPage;
+export default AdminDashboardPage;

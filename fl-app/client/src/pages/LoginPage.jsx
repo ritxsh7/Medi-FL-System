@@ -24,7 +24,7 @@ const LoginPage = () => {
         formData
       );
       const { role, token, message, id } = response.data;
-      console.log(role, token, message);
+      // console.log(role, token, message);
       setMessage(message);
       localStorage.setItem("token", token);
       localStorage.setItem("cookies", JSON.stringify({ role, id }));
