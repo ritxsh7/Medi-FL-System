@@ -3,14 +3,27 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const AdminCreateModal = ({ setIsModalOpen }) => {
-  const [sessionName, setSessionName] = useState("");
-  const [numClients, setNumClients] = useState();
   const navigate = useNavigate();
   const { id } = JSON.parse(localStorage.getItem("cookies"));
+  const aggregateAlgorithms = ["WIFA", "FedAvg", "FedNova", "FedProx"];
+  const models = ["YOLOv8", "U-Net", "EfficientNet"];
+
+  const [sessionName, setSessionName] = useState("");
+  const [numClients, setNumClients] = useState();
+  const [numRounds, setNumRounds] = useState(3);
+  const [aggregationAlgorithm, setAggregationAlgorithm] = useState("WIFA");
+  const [model, setModel] = useState("YOLOv8");
 
   const handleCreateSession = async (e) => {
     e.preventDefault();
-    const body = { name: sessionName, numClients, adminId: id };
+    const body = {
+      name: sessionName,
+      numClients,
+      adminId: id,
+      numRounds,
+      model,
+      aggregationAlgorithm,
+    };
     try {
       const response = await axios.post(
         "http://localhost:5000/server/create-session",
@@ -18,7 +31,7 @@ const AdminCreateModal = ({ setIsModalOpen }) => {
       );
       const { session, message } = response.data;
       alert(message);
-      navigate(`/session?id=${session._id}`);
+      navigate(`/admin/session?id=${session._id}`);
       setIsModalOpen(false);
     } catch (error) {
       console.log(error);
@@ -45,6 +58,35 @@ const AdminCreateModal = ({ setIsModalOpen }) => {
           value={numClients}
           required
           onChange={(e) => setNumClients(e.target.value)}
+          className="w-full text-sm px-4 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 mb-4"
+        />
+        <p className="text-xs text-gray-500 mb-1">Aggregation algorithm: </p>
+        <select
+          value={aggregationAlgorithm}
+          onChange={(e) => setAggregationAlgorithm(e.target.value)}
+          className="w-full text-sm text-black px-4 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 mb-4"
+        >
+          {aggregateAlgorithms.map((algo) => (
+            <option value={algo}>{algo}</option>
+          ))}
+        </select>
+        <p className="text-xs text-gray-500 mb-1">Training model: </p>
+        <select
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          className="w-full text-sm px-4 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 mb-4"
+        >
+          {models.map((model) => (
+            <option value={model}>{model}</option>
+          ))}
+        </select>
+        <p className="text-xs text-gray-500 mb-1">Aggregation rounds: </p>
+        <input
+          type="text"
+          placeholder="Enter no of rounds"
+          value={numRounds}
+          required
+          onChange={(e) => setNumRounds(e.target.value)}
           className="w-full text-sm px-4 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 mb-4"
         />
         <div className="flex justify-between space-x-4 text-sm">

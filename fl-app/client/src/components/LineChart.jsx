@@ -45,7 +45,8 @@ const LineChart = ({ metrics }) => {
   useEffect(() => {
     // Update chart data when metrics change
     const updatedData = {
-      labels: metrics.map((_, i) => i + 1),
+      labels:
+        metrics.length > 0 ? metrics.map((_, i) => i + 1) : [1, 2, 3, 4, 5],
       datasets: [
         {
           ...chartData.datasets[0],
