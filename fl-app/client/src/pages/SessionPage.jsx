@@ -5,6 +5,7 @@ import axios from "axios";
 import LineChart from "../components/LineChart";
 import LogsDisplay from "../components/LogsDisplay";
 import { useSearchParams } from "react-router-dom";
+import SessionPageSideBar from "../components/SessionPageSideBar";
 
 const socket = io("http://127.0.0.1:5000");
 
@@ -13,18 +14,19 @@ const SessionPage = () => {
   const id = query.get("id");
 
   const [serverLogs, setServerLogs] = useState("");
-  const [messages, setMessages] = useState("Clients joined: 0");
   const [structuredLogs, setStructuredLogs] = useState([]);
   const [session, setSession] = useState(null);
+  const [isServedStarted, setIsServerStarted] = useState(false);
+
+  const fetchSessionDetails = async () => {
+    const response = await axios.get(
+      `http://localhost:5000/server/session/${id}`
+    );
+    setSession(response.data.session);
+    console.log(response.data);
+  };
 
   useEffect(() => {
-    const fetchSessionDetails = async () => {
-      const response = await axios.get(
-        `http://localhost:5000/server/session/${id}`
-      );
-      setSession(response.data.session);
-      console.log(response.data.session);
-    };
     fetchSessionDetails();
   }, [id]);
 
@@ -49,8 +51,8 @@ const SessionPage = () => {
       }
     });
 
-    socket.on("client_joined", (data) => {
-      setSession(data);
+    socket.on("client_joined", () => {
+      fetchSessionDetails();
     });
 
     return () => {
@@ -59,69 +61,60 @@ const SessionPage = () => {
   }, []);
 
   const startServer = async () => {
-    const response = await axios.post(
-      "http://localhost:5000/server/start_server"
-    );
-    setMessages((msg) => msg + "\n" + response.data.message);
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/server/start_server"
+      );
+      setServerLogs((msg) => msg + "\n" + response.data.message + "\n");
+      setIsServerStarted(true);
+    } catch (error) {
+      console.log(error);
+      setServerLogs(error.response.data.message);
+    }
   };
 
   const startTraining = async () => {
-    const response = await axios.post(
-      "http://127.0.0.1:5000/client/start_clients",
-      {
-        num_clients: 2,
-      }
-    );
-    setMessages((msg) => msg + "\n" + response.data.message);
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/client/start_clients",
+        { num_clients: session.numClients }
+      );
+      setServerLogs((msg) => msg + "\n" + response.data.message + "\n");
+    } catch (error) {
+      console.log(error);
+      setServerLogs(error.response.data.message);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Admin Interface
-        </h1>
-        <p>{session?.name}</p>
-        <div className="flex justify-center space-x-4 mb-6">
-          <button
-            onClick={startServer}
-            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition duration-200"
-          >
-            Start Server
-          </button>
+    session && (
+      <div className="min-h-screen bg-blue-50 flex text-left relative">
+        {/* Left Sidebar */}
+        <SessionPageSideBar
+          session={session}
+          startServer={startServer}
+          startTraining={startTraining}
+          isServerStarted={isServedStarted}
+        />
 
-          <button
-            onClick={startTraining}
-            className="px-4 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition duration-200"
-          >
-            Start Training
-          </button>
-        </div>
-        <div>
-          {session?.clients.map((client) => (
-            <p>client joined: {client} </p>
-          ))}
-        </div>
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Messages</h2>
-          <div className="p-4 bg-gray-50 border border-gray-300 rounded h-32 overflow-y-auto">
-            <pre className="text-sm text-gray-700 whitespace-pre-wrap">
-              {messages}
-            </pre>
+        {/* Main Content */}
+        <main className="w-[70vw] flex flex-col px-4 py-2">
+          {/* Live Metrics */}
+          <div className="bg-white shadow-md rounded-md p-2 mb-6 min-h-[40vh]">
+            <h3 className="text-lg font-semibold text-gray-600 mb-4">
+              Live Metrics
+            </h3>
+            <LineChart metrics={structuredLogs} />
           </div>
-        </div>
-
-        <div>
-          <LineChart metrics={structuredLogs} />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">
-            Server Logs
-          </h2>
-          <LogsDisplay logs={serverLogs} />
-        </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Server Logs
+            </h2>
+            <LogsDisplay logs={serverLogs} />
+          </div>
+        </main>
       </div>
-    </div>
+    )
   );
 };
 
