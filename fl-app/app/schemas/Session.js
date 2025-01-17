@@ -15,6 +15,16 @@ const SessionSchema = new mongoose.Schema({
       ref: "Entity",
     },
   ],
+  model: {
+    type: String,
+    required: true,
+    default: "YOLOv8",
+  },
+  aggregationAlgorithm: {
+    type: String,
+    enum: ["WIFA", "FedAvg", "FedProx", "FedNova"],
+    default: "WIFA",
+  },
   metrics: {
     localAverage: {
       type: Number,
@@ -25,8 +35,12 @@ const SessionSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "in-progress", "completed"],
+    enum: ["pending", "listening", "in-progress", "completed"],
     default: "pending",
+  },
+  numRounds: {
+    type: Number,
+    default: 3,
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
