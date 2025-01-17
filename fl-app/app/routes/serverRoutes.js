@@ -23,8 +23,10 @@ router.post("/join-session", async (req, res) => {
 
     session.clients.push(clientId);
     await session.save();
-    ioInstance.emit("client_joined", session);
-    return res.status(200).json({ message: "Session joined" });
+    ioInstance.emit("client_joined");
+    return res
+      .status(200)
+      .json({ message: "Session joined, session ID: " + session._id });
   } catch (error) {
     console.log(error);
     return res
@@ -37,7 +39,9 @@ router.post("/join-session", async (req, res) => {
 router.get("/session/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const session = await Session.findById(id).populate("createdBy");
+    const session = await Session.findById(id)
+      .populate("clients", "_id accessId")
+      .populate("createdBy", "_id accessId");
     return res.status(200).json({ session });
   } catch (error) {
     return res
@@ -49,12 +53,22 @@ router.get("/session/:id", async (req, res) => {
 // Create session for admin
 router.post("/create-session", async (req, res) => {
   try {
-    const { name, numClients, adminId } = req.body;
+    const {
+      name,
+      numClients,
+      adminId,
+      numRounds,
+      aggregationAlgorithm,
+      model,
+    } = req.body;
 
     const newSession = new Session({
       name,
       numClients,
       createdBy: adminId,
+      numRounds,
+      aggregationAlgorithm,
+      model,
     });
 
     const savedSession = await newSession.save();
