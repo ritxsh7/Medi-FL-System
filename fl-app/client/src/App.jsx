@@ -45,7 +45,7 @@ const App = () => {
             </ProtectedPage>
           }
         />
-        <Route exact path="/session" element={<SessionPage />} />
+        <Route exact path="/admin/session" element={<SessionPage />} />
         <Route exact path="/test" element={<Test />} />
       </Routes>
     </Router>
