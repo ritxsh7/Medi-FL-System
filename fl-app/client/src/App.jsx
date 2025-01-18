@@ -10,7 +10,8 @@ import ProtectedPage from "./pages/ProtectedPage";
 import RedirectPage from "./pages/RedirectPage";
 import ClientDashboardPage from "./pages/ClientDashboardPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
-import SessionPage from "./pages/SessionPage";
+import AdminSessionPage from "./pages/AdminSessionPage";
+import ClientSessionPage from "./pages/ClientSessionPage";
 
 const App = () => {
   return (
@@ -45,7 +46,8 @@ const App = () => {
             </ProtectedPage>
           }
         />
-        <Route exact path="/admin/session" element={<SessionPage />} />
+        <Route exact path="/admin/session" element={<AdminSessionPage />} />
+        <Route exact path="/client/session" element={<ClientSessionPage />} />
         <Route exact path="/test" element={<Test />} />
       </Routes>
     </Router>
