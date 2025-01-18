@@ -6,7 +6,10 @@ from utils import create_model
 from typing import Dict, Optional, Tuple
 import sys
 import io
+import os 
 import logging
+
+print("CWD : ", os.getcwd())
 
 # Set UTF-8 as the default encoding
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -50,8 +53,8 @@ results_list = []
 
 # Define evaluation function for server-side evaluation
 def get_eval_fn(model):
-    test_dir = "../data/Testing"
-    test_gen = create_test_generator(test_dir)
+    script_dir = os.path.dirname(os.path.abspath(__file__))    
+    test_gen = create_test_generator(os.path.join(script_dir, "../data/Testing"))
 
     def evaluate(
         server_round: int,

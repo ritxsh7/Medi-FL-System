@@ -17,9 +17,10 @@ def create_model():
     ])
     return model
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-train_dir = "../data/Training"
-test_dir = "../data/Testing"
+train_dir = os.path.abspath(os.path.join(script_dir, "../data/Training"))
+test_dir = os.path.abspath(os.path.join(script_dir, "../data/Testing"))
 
 
 def load_data(dir):
