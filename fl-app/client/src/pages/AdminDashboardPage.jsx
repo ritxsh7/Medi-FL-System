@@ -50,7 +50,7 @@ const AdminDashboardPage = () => {
           Your Sessions
         </h1>
         <button
-          className="text-sm px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
+          className="text-md px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
           onClick={() => {
             setIsModalOpen(true);
           }}

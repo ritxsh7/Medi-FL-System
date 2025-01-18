@@ -77,7 +77,7 @@ const SessionPage = () => {
     try {
       const response = await axios.post(
         "http://127.0.0.1:5000/client/start_clients",
-        { num_clients: session.numClients }
+        { num_clients: session.numClients, clients: session.clients }
       );
       setServerLogs((msg) => msg + "\n" + response.data.message + "\n");
     } catch (error) {
@@ -98,19 +98,20 @@ const SessionPage = () => {
         />
 
         {/* Main Content */}
-        <main className="w-[70vw] flex flex-col px-4 py-2">
+        <main className="w-[70vw] flex flex-col p-4">
           {/* Live Metrics */}
           <div className="bg-white shadow-md rounded-md p-2 mb-6 min-h-[40vh]">
-            <h3 className="text-lg font-semibold text-gray-600 mb-4">
-              Live Metrics
-            </h3>
-            <LineChart metrics={structuredLogs} />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
               Server Logs
             </h2>
             <LogsDisplay logs={serverLogs} />
+          </div>
+
+          <div className="bg-white shadow-md rounded-md p-2 mb-6 min-h-[40vh]">
+            <h3 className="text-xl font-semibold text-gray-600 mb-4">
+              Live Metrics
+            </h3>
+            <LineChart metrics={structuredLogs} />
           </div>
         </main>
       </div>
