@@ -1,11 +1,14 @@
 const express = require("express");
-const { startClientProcesses } = require("../utils/processes.js");
+const {
+  startClientProcesses,
+  stopAllProcesses,
+} = require("../utils/processes.js");
 
 const router = express.Router();
 
 // Start client processes
-router.post("/start_clients", (req, res) => {
-  const { num_clients } = req.body;
+router.post("/start_clients", async (req, res) => {
+  const { num_clients, clients } = req.body;
 
   if (!num_clients || num_clients <= 0) {
     return res
@@ -14,9 +17,10 @@ router.post("/start_clients", (req, res) => {
   }
 
   try {
-    startClientProcesses(num_clients, res);
+    startClientProcesses(clients, res);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
+    stopAllProcesses();
   }
 });
 

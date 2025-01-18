@@ -12,43 +12,7 @@ const initializeServerIO = (io) => {
   ioInstance = io;
 };
 
-// Join session for client
-router.post("/join-session", async (req, res) => {
-  const { sessionId, clientId } = req.body;
-  try {
-    const session = await Session.findById(sessionId);
-
-    if (!session)
-      return res.status(404).json({ message: "No such session exists" });
-
-    session.clients.push(clientId);
-    await session.save();
-    ioInstance.emit("client_joined");
-    return res
-      .status(200)
-      .json({ message: "Session joined, session ID: " + session._id });
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Something went wrong while joining the client" });
-  }
-});
-
-// Get session details
-router.get("/session/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const session = await Session.findById(id)
-      .populate("clients", "_id accessId")
-      .populate("createdBy", "_id accessId");
-    return res.status(200).json({ session });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Something went wrong while fetching session" });
-  }
-});
+let isSessionStarted = false;
 
 // Create session for admin
 router.post("/create-session", async (req, res) => {
@@ -84,12 +48,58 @@ router.post("/create-session", async (req, res) => {
   }
 });
 
+// Join session for client
+router.post("/join-session", async (req, res) => {
+  const { sessionId, clientId } = req.body;
+
+  if (!isSessionStarted)
+    return res
+      .status(300)
+      .json({ message: "Aggregation server not started yet" });
+
+  try {
+    const session = await Session.findById(sessionId);
+
+    if (!session)
+      return res.status(404).json({ message: "No such session exists" });
+
+    session.clients.push(clientId);
+    await session.save();
+    ioInstance.emit("client_joined");
+    return res
+      .status(200)
+      .json({ message: "Session joined, session ID: " + session._id });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ message: "Something went wrong while joining the client" });
+  }
+});
+
+// Get session details
+router.get("/session/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const session = await Session.findById(id)
+      .populate("clients", "_id accessId")
+      .populate("createdBy", "_id accessId");
+    return res.status(200).json({ session });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Something went wrong while fetching session" });
+  }
+});
+
 // Start the server process
 router.post("/start_server", (req, res) => {
   try {
+    isSessionStarted = true;
     startServerProcess(res);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
+    stopAllProcesses();
   }
 });
 
