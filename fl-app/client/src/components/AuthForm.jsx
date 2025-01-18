@@ -67,7 +67,7 @@ const AuthForm = ({
         </button>
       </form>
       <p
-        className="text-sm text-blue-600 mt-4 cursor-pointer hover:underline"
+        className="text-md text-blue-600 mt-4 cursor-pointer hover:underline"
         onClick={linkAction}
       >
         {linkText}

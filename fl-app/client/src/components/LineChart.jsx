@@ -23,7 +23,7 @@ ChartJS.register(
 
 const LineChart = ({ metrics }) => {
   const [chartData, setChartData] = useState({
-    labels: [], // Rounds
+    labels: [],
     datasets: [
       {
         label: "Accuracy",
@@ -90,8 +90,8 @@ const LineChart = ({ metrics }) => {
   };
 
   return (
-    <div style={{ width: "80%", margin: "auto" }}>
-      <Line data={chartData} options={options} />
+    <div style={{ width: "90%", margin: "auto" }}>
+      <Line data={chartData} options={options} style={{ width: "100%" }} />
     </div>
   );
 };

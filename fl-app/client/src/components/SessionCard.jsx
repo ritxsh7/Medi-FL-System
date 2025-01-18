@@ -10,9 +10,9 @@ const infoBars = [
 const SessionInfo = ({ info, index }) => (
   <div className="flex items-center space-x-2 ">
     {infoBars[index].icon}
-    <div className="flex items-center gap-1 text-xs">
+    <div className="flex items-center gap-1 text-md">
       <p className="text-gray-500">{infoBars[index].title}: </p>
-      <p className="text-sm font-semibold">{info}</p>
+      <p className="text-md font-semibold">{info}</p>
     </div>
   </div>
 );
@@ -28,16 +28,16 @@ const SessionCard = ({ session }) => {
         </div>
         <div className="flex justify-between items-center text-left">
           <div>
-            <h2 className="text-md font-semibold text-gray-800">
+            <h2 className="text-lg font-semibold text-gray-800">
               {session.name}
             </h2>
-            <p className="text-sm text-gray-500">{session.date}</p>
+            <p className="text-md text-gray-500">{session.date}</p>
           </div>
         </div>
       </div>
 
       {/* Session Details */}
-      <div className="grid grid-cols-2 gap-3 mt-4 w-full">
+      <div className="grid grid-cols-2 text-md gap-3 mt-4 w-full">
         {Object.values(session.info).map((info, i) => (
           <SessionInfo info={info} index={i} />
         ))}

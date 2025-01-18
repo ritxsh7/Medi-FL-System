@@ -84,9 +84,9 @@ const AdminUI = () => {
         </div>
 
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Messages</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Messages</h2>
           <div className="p-4 bg-gray-50 border border-gray-300 rounded h-32 overflow-y-auto">
-            <pre className="text-sm text-gray-700 whitespace-pre-wrap">
+            <pre className="text-md text-gray-700 whitespace-pre-wrap">
               {messages}
             </pre>
           </div>
@@ -96,7 +96,7 @@ const AdminUI = () => {
           <LineChart metrics={structuredLogs} />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
             Server Logs
           </h2>
           <LogsDisplay logs={serverLogs} />

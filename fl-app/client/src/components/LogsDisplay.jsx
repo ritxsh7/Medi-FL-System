@@ -5,16 +5,16 @@ const LogsDisplay = ({ logs }) => {
 
   useEffect(() => {
     if (logsRef.current) {
-      logsRef.current.scrollTop = logsRef.current.scrollHeight; // Auto-scroll to the bottom
+      logsRef.current.scrollTop = logsRef.current.scrollHeight;
     }
   }, [logs]);
 
   return (
     <div
       ref={logsRef}
-      className="p-4 bg-gray-800 border border-gray-600 rounded h-64 overflow-y-auto"
+      className="p-4 bg-gray-800 min-h-[40vh] border border-gray-600 rounded h-64 overflow-y-auto"
     >
-      <pre className="text-sm text-left text-lime-500 whitespace-pre-wrap">
+      <pre className="text-md text-left text-lime-500 whitespace-pre-wrap">
         {logs}
       </pre>
     </div>

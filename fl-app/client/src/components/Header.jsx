@@ -7,7 +7,7 @@ const Header = () => {
         <span className="text-[#3498db]">mediFl</span>
       </div>
       <div>
-        <h1 className="text-sm font-semibold text-[#ecf0f1] mt-2">
+        <h1 className="text-md font-semibold text-[#ecf0f1] mt-2">
           A Federated Learning Architecture for Healthcare
         </h1>
       </div>

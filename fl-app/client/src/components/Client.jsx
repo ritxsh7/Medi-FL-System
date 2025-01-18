@@ -82,9 +82,9 @@ const ClientUI = () => {
         </h1>
 
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Status</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Status</h2>
           <div className="p-4 bg-gray-50 border border-gray-300 rounded">
-            <p className="text-sm text-gray-700">{status}</p>
+            <p className="text-md text-gray-700">{status}</p>
           </div>
         </div>
         <div>
@@ -92,7 +92,7 @@ const ClientUI = () => {
           <LineChart metrics={validationLogs} />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Logs</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Logs</h2>
           <LogsDisplay logs={clientLogs} />
         </div>
       </div>
