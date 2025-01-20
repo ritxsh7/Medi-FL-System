@@ -93,10 +93,27 @@ router.get("/session/:id", async (req, res) => {
 });
 
 // Start the server process
-router.post("/start_server", (req, res) => {
+router.post("/start_server/:id", async (req, res) => {
+  const { id } = req.params;
   try {
     isSessionStarted = true;
-    startServerProcess(res);
+
+    if (startServerProcess(id)) {
+      const session = await Session.findById(id)
+        .populate("createdBy", "_id")
+        .populate("clients", "_id accessId");
+      session.status = "listening";
+      await session.save();
+      return res.json({
+        status: "success",
+        message: "Server started",
+        session,
+      });
+    }
+
+    return res
+      .status(500)
+      .json({ message: "Something went wrong while starting the server" });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
     stopAllProcesses();
