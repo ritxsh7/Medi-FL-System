@@ -1,20 +1,31 @@
 const { spawn } = require("child_process");
 
 const path = require("path");
+const Session = require("../schemas/Session");
 const clientPath = path.resolve(__dirname, "../../framework/client.py");
 const serverPath = path.resolve(__dirname, "../../framework/server.py");
 
-console.log(clientPath, serverPath);
-
 let serverProcess = null;
 let clientProcesses = [];
-
-console.log(clientProcesses);
 
 let ioInstance;
 
 const initializeProcessIO = (io) => {
   ioInstance = io;
+};
+
+const updateSessionStatus = async (sessionId) => {
+  try {
+    const session = await Session.findById(sessionId);
+    session.status = "completed";
+    console.log(`Session ${sessionId} status updated to completed.`);
+    ioInstance.emit("session_completed", {
+      message: `Session ${sessionId} has been completed.`,
+      session,
+    });
+  } catch (err) {
+    console.error(`Error updating session ${sessionId} status:`, err);
+  }
 };
 
 // Stream logs to Socket.IO
@@ -26,7 +37,6 @@ const streamLogs = (process, eventName, id) => {
 
     process.stderr.on("data", (data) => {
       ioInstance.emit(eventName, { log: data.toString() });
-      console.log(data.toString());
     });
     console.log(`Sent logs to ${id}`);
   } catch (err) {
@@ -35,12 +45,9 @@ const streamLogs = (process, eventName, id) => {
 };
 
 // Start the Flower server process
-const startServerProcess = (res) => {
+const startServerProcess = (id) => {
   if (serverProcess) {
-    res
-      .status(400)
-      .json({ status: "error", message: "Server already running" });
-    return;
+    throw "Server already running";
   }
 
   serverProcess = spawn("python", [`"${serverPath}"`], {
@@ -52,23 +59,24 @@ const startServerProcess = (res) => {
   serverProcess.on("close", (code) => {
     console.log(`Server process exited with code ${code}`);
     serverProcess = null;
+    if (clientProcesses.length === 0) {
+      updateSessionStatus(id);
+    }
   });
 
-  res.json({ status: "success", message: "Server started" });
+  return true;
 };
 
 // Start client processes
-const startClientProcesses = (clients, res) => {
+const startClientProcesses = (clients) => {
   if (clientProcesses.length > 0) {
-    return res
-      .status(400)
-      .json({ status: "error", message: "Clients already running" });
+    throw "Client processes are already running";
   }
 
   for (let client of clients) {
     const clientProcess = spawn(
       "python",
-      [`"${clientPath}"`, `--client_id=${client._id.slice(0, 4)}`],
+      [`"${clientPath}"`, `--dir="${client.dir}"`],
       { shell: true }
     );
 
@@ -80,12 +88,12 @@ const startClientProcesses = (clients, res) => {
 
     clientProcess.on("close", (code) => {
       console.log(`Client ${client._id} process exited with code ${code}`);
+      clientProcesses = clientProcesses.filter((p) => p !== clientProcess);
     });
 
     clientProcesses.push(clientProcess);
   }
-
-  res.json({ status: "success", message: `${clients.length} clients started` });
+  return true;
 };
 
 // Stop all processes
