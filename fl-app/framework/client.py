@@ -1,21 +1,15 @@
-import tensorflow as tf
 import flwr as fl
-import numpy as np
-import logging
+import argparse
 from tensorflow.keras.optimizers import Adamax
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from utils import create_model, load_train_data,load_test_data
-import sys
+from utils import create_model, load_data
+from sklearn.utils.class_weight import compute_class_weight
+import numpy as np
+
 import io
 import logging
-import argparse
+import sys
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--client_id", type=int, required=True, help="Unique ID for the client")
-args = parser.parse_args()
-client_id = args.client_id
-
-# Set UTF-8 as the default encoding
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
@@ -36,45 +30,49 @@ fl_logger.setLevel(logging.INFO)
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 
-import os
-print("Current working directory:", os.getcwd())
+# Parse arguments
+parser = argparse.ArgumentParser(description="Federated Learning Client")
+parser.add_argument("--dir", type=str, required=True, help="Specify the data directory")
+args = parser.parse_args()
 
-class NoWarningsFilter(logging.Filter):
-    def filter(self, record):
-        return record.levelno < logging.WARNING
-    
-console_handler.addFilter(NoWarningsFilter())
-fl_logger.addHandler(console_handler)
+dir = args.dir
 
+IMG_SIZE = (64, 64)
+BATCH_SIZE = 32
 
 # Create data generators
 datagen = ImageDataGenerator(rescale=1.0/255.0)
 
 # Load train data
-client1_train = load_train_data()
-client1_test = load_test_data()
+client_train = load_data(dir, split='train')
+client_valid = load_data(dir, split='valid')
 
-count = client1_train['labels'].value_counts()
+count = client_train['labels'].value_counts()
 
-client1_train_gen = datagen.flow_from_dataframe(
-    client1_train,
+client_train_gen = datagen.flow_from_dataframe(
+    client_train,
     x_col = "filepaths",
     y_col = "labels",
-    target_size = (244,244),
+    target_size = IMG_SIZE,
     color_mode = "rgb",
     class_mode="categorical",
-    batch_size = 32
+    batch_size = BATCH_SIZE
 )
 
-client1_test_gen = datagen.flow_from_dataframe(
-    client1_test,
+client_valid_gen = datagen.flow_from_dataframe(
+    client_valid,
     x_col = "filepaths",
     y_col = "labels",
-    target_size = (244,244),
+    target_size = IMG_SIZE,
     color_mode = "rgb",
     class_mode="categorical",
-    batch_size = 32
+    batch_size = BATCH_SIZE
 )
+
+# Weights
+train_labels = client_train_gen.classes
+class_weights = compute_class_weight(class_weight='balanced', classes=np.unique(train_labels), y=train_labels)
+class_weights = dict(enumerate(class_weights))
 
 
 results_list = []
@@ -86,28 +84,40 @@ class FlwrClient(fl.client.NumPyClient):
         self.test_gen = test_gen
 
     def get_parameters(self, config):
+        # Display server metrics if available
+        if "server_metrics" in config:
+            server_metrics = config["server_metrics"]
+            print(f"Received server metrics: {server_metrics}")
         return self.model.get_weights()
 
     def fit(self, parameters, config):
+        # Update model weights
         self.model.set_weights(parameters)
-        history = self.model.fit(self.train_gen, epochs = 1)
-        results = {"loss": history.history["loss"][0], "accuracy": history.history["accuracy"][0]}
+
+        # Train locally
+        history = self.model.fit(self.train_gen, epochs=1, verbose=1)
+        results = {
+            "loss": history.history["loss"][0],
+            "accuracy": history.history["accuracy"][0],
+        }
         print("Training Metrics, Accuracy = {}, Loss = {}".format(results['accuracy'], results['loss']))
         results_list.append(results)
-        return self.model.get_weights(), len(self.train_gen),results
+
+        # Return metrics to server
+        return self.model.get_weights(), len(self.train_gen), results
 
     def evaluate(self, parameters, config):
+        # Evaluate on test data
         self.model.set_weights(parameters)
         loss, accuracy = self.model.evaluate(self.test_gen)
         print("Validation Metrics, Accuracy = {}, Loss = {}".format(accuracy, loss))
         num_examples_test = len(self.test_gen)
         return loss, num_examples_test, {"accuracy": accuracy}
+
     
 
 model = create_model()
 model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
 
-client = FlwrClient(model, client1_train_gen, client1_test_gen)
-
-# Start the Flower client to connect to the Flower server
-fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
+client = FlwrClient(model, client_train_gen, client_valid_gen)
+fl.client.start_client(server_address="localhost:8080", client=client)

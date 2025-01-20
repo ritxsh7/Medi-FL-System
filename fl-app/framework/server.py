@@ -1,49 +1,44 @@
 import flwr as fl
-import logging
+from typing import Dict, Optional, Tuple
 from tensorflow.keras.optimizers import Adamax
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from utils import create_model
-from typing import Dict, Optional, Tuple
-import sys
+
+
+IMG_SIZE = (64, 64)
+BATCH_SIZE = 32
+
 import io
-import os 
 import logging
+import sys
 
-print("CWD : ", os.getcwd())
-
-# Set UTF-8 as the default encoding
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
-
-# Configure logging to only show INFO messages
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(message)s",
-    handlers=[logging.StreamHandler()],
+    format="%(asctime)s [%(levelname)s]: %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+    ],
+    encoding='utf-8',
 )
 
 # Create the logger
 fl_logger = logging.getLogger("flwr")
 fl_logger.setLevel(logging.INFO)
+
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 
-class NoWarningsFilter(logging.Filter):
-    def filter(self, record):
-        return record.levelno < logging.WARNING
-
-console_handler.addFilter(NoWarningsFilter())
-fl_logger.addHandler(console_handler)
-
-
 # Create a test generator for evaluation
-def create_test_generator(test_dir):
+def create_test_generator(val_dir):
     datagen = ImageDataGenerator(rescale=1.0/255.0)
     return datagen.flow_from_directory(
-        test_dir,
-        target_size=(244, 244),
-        batch_size=32,
+        val_dir,
+        target_size=IMG_SIZE,
+        batch_size=BATCH_SIZE,
         class_mode='categorical',
         shuffle=False
     )
@@ -53,8 +48,8 @@ results_list = []
 
 # Define evaluation function for server-side evaluation
 def get_eval_fn(model):
-    script_dir = os.path.dirname(os.path.abspath(__file__))    
-    test_gen = create_test_generator(os.path.join(script_dir, "../data/Testing"))
+    val_dir = "D://federated learning//fed-impl//data//valid"
+    val_gen = create_test_generator(val_dir)
 
     def evaluate(
         server_round: int,
@@ -62,8 +57,8 @@ def get_eval_fn(model):
         config: Dict[str, fl.common.Scalar],
     ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
         model.set_weights(parameters) 
-        loss, accuracy = model.evaluate(test_gen)
-        print("After round {}, Global accuracy = {}, Loss = {}".format(server_round,accuracy, loss))
+        loss, accuracy = model.evaluate(val_gen)
+        print("After round {}, Global accuracy = {}, Loss = {} ".format(server_round,accuracy, loss))
         results = {"round":server_round,"loss": loss, "accuracy": accuracy}
         results_list.append(results)
         return loss, {"accuracy": accuracy}
@@ -78,10 +73,9 @@ model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accur
 strategy = fl.server.strategy.FedAvg(evaluate_fn=get_eval_fn(model), min_available_clients = 2)
 
 # Start Flower server
-def start_server():
-    fl.server.start_server(
-        config=fl.server.ServerConfig(num_rounds=3),
-        strategy=strategy,
-    )
-if __name__ == "__main__":
-    start_server()
+fl.server.start_server(
+    config=fl.server.ServerConfig(num_rounds=20),
+    strategy=strategy
+)
+
+model.save("../model/final_server_model.h5") 

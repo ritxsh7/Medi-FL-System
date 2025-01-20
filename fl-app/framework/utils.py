@@ -1,52 +1,59 @@
-import tensorflow as tf
 import os
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
+from tensorflow.keras.layers import  GlobalAveragePooling2D, Dense, Dropout
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.models import Sequential
+
+import numpy as np
+import os
+
+
+IMG_SIZE = (64, 64)
+BATCH_SIZE = 32
+NUM_CLASSES = 5 
 
 def create_model():
-    model = tf.keras.models.Sequential([
-        tf.keras.layers.Conv2D(32, (3, 3), activation="relu", input_shape=(244, 244, 3)),  # Adjust input shape here
-        tf.keras.layers.MaxPooling2D((2, 2)),
-        tf.keras.layers.Conv2D(64, (3, 3), activation="relu"),
-        tf.keras.layers.MaxPooling2D((2, 2)),
-        tf.keras.layers.Conv2D(64, (3, 3), activation="relu"),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(64, activation="relu"),
-        tf.keras.layers.Dense(4, activation="softmax")  # 4 classes
+    
+    base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(IMG_SIZE[0], IMG_SIZE[0], 3))
+
+    base_model.trainable = False
+
+    model = Sequential([
+        base_model,
+        GlobalAveragePooling2D(),
+        Dense(128, activation='relu'),
+        Dropout(0.5),
+        Dense(NUM_CLASSES, activation='softmax')
     ])
     return model
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
 
-train_dir = os.path.abspath(os.path.join(script_dir, "../data/Training"))
-test_dir = os.path.abspath(os.path.join(script_dir, "../data/Testing"))
+def load_data(dir, split):
 
-
-def load_data(dir):
     filepaths = []
     labels = []
 
+    dir = os.path.join(dir, split)
 
+    if not os.path.exists(dir):
+        raise FileNotFoundError(f"Directory not found: {dir}")
+    
     folds = os.listdir(dir)
-
     for fold in folds:
         foldpath = os.path.join(dir, fold)
         
-        files = os.listdir(foldpath)
-        for f in files:
-            fpath = os.path.join(foldpath, f)
-            
-            filepaths.append(fpath)
-            labels.append(fold)
+        # List all files in the class folder
+        if os.path.isdir(foldpath):
+            files = os.listdir(foldpath)
+            for f in files:
+                fpath = os.path.join(foldpath, f)
+                
+                # Add file path and label
+                filepaths.append(fpath)
+                labels.append(fold)
 
-    return pd.DataFrame(data={'filepaths':filepaths, 'labels':labels})
-
-
-def load_train_data():
-    client_data = load_data(train_dir)
-    return client_data.sample(frac=0.5, random_state=np.random.randint(1, 100))
-    
-
-def load_test_data():
-    return load_data(test_dir)
+    # Create and return a DataFrame
+    return pd.DataFrame(data={"filepaths": filepaths, "labels": labels})
