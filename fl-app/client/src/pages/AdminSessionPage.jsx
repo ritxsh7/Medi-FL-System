@@ -17,6 +17,7 @@ const SessionPage = () => {
   const [structuredLogs, setStructuredLogs] = useState([]);
   const [session, setSession] = useState(null);
   const [isServedStarted, setIsServerStarted] = useState(false);
+  const [isSessionCompleted, setIsSessionCompleted] = useState(false);
 
   const fetchSessionDetails = async () => {
     const response = await axios.get(
@@ -55,6 +56,11 @@ const SessionPage = () => {
       fetchSessionDetails();
     });
 
+    socket.on("session_completed", (data) => {
+      setIsSessionCompleted(true);
+      setSession(data.session);
+    });
+
     return () => {
       socket.off("server_log");
     };
@@ -63,10 +69,11 @@ const SessionPage = () => {
   const startServer = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/server/start_server"
+        `http://localhost:5000/server/start_server/${id}`
       );
       setServerLogs((msg) => msg + "\n" + response.data.message + "\n");
       setIsServerStarted(true);
+      setSession(response.data.session);
     } catch (error) {
       console.log(error);
       setServerLogs(error.response.data.message);
@@ -76,10 +83,11 @@ const SessionPage = () => {
   const startTraining = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/client/start_clients",
-        { num_clients: session.numClients, clients: session.clients }
+        `http://127.0.0.1:5000/client/start_clients/${id}`,
+        { clients: session.clients }
       );
       setServerLogs((msg) => msg + "\n" + response.data.message + "\n");
+      setSession(response.data.session);
     } catch (error) {
       console.log(error);
       setServerLogs(error.response.data.message);

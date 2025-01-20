@@ -5,6 +5,7 @@ import axios from "axios";
 import LogsDisplay from "../components/LogsDisplay";
 import LineChart from "../components/LineChart";
 import io from "socket.io-client";
+import { cleanLogText } from "../utils/ui";
 
 const { id } = JSON.parse(localStorage.getItem("cookies"));
 const socket = io("http://127.0.0.1:5000");
