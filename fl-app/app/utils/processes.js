@@ -14,12 +14,12 @@ const initializeProcessIO = (io) => {
   ioInstance = io;
 };
 
-const updateSessionStatus = async (sessionId) => {
+const updateSessionStatus = async (sessionId, status) => {
   try {
     const session = await Session.findById(sessionId);
-    session.status = "completed";
-    console.log(`Session ${sessionId} status updated to completed.`);
-    ioInstance.emit("session_completed", {
+    session.status = status;
+    await session.save();
+    ioInstance.emit("session_update", {
       message: `Session ${sessionId} has been completed.`,
       session,
     });
@@ -45,22 +45,30 @@ const streamLogs = (process, eventName, id) => {
 };
 
 // Start the Flower server process
-const startServerProcess = (id) => {
+const startServerProcess = (id, num_clients, aggregator) => {
   if (serverProcess) {
     throw "Server already running";
   }
 
-  serverProcess = spawn("python", [`"${serverPath}"`], {
-    shell: true,
-  });
+  serverProcess = spawn(
+    "python",
+    [
+      `"${serverPath}"`,
+      `--num_rounds=${num_clients}`,
+      // `--aggregator=${aggregator}`,
+    ],
+    {
+      shell: true,
+    }
+  );
 
   streamLogs(serverProcess, "server_log", "admin");
 
   serverProcess.on("close", (code) => {
     console.log(`Server process exited with code ${code}`);
     serverProcess = null;
-    if (clientProcesses.length === 0) {
-      updateSessionStatus(id);
+    if (code === 0) {
+      updateSessionStatus(id, "completed");
     }
   });
 

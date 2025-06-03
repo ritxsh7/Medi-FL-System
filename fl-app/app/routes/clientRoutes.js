@@ -9,12 +9,13 @@ const router = express.Router();
 
 // Start client processes
 router.post("/start_clients/:id", async (req, res) => {
-  let { clients } = req.body;
   const { id } = req.params;
 
   const session = await Session.findById(id)
     .populate("createdBy", "_id")
     .populate("clients", "_id accessId");
+
+  // console.log(session);
 
   const num_clients = session.numClients;
 
@@ -24,14 +25,18 @@ router.post("/start_clients/:id", async (req, res) => {
       .json({ status: "error", message: "Invalid number of clients" });
   }
 
-  dataDirs = [
-    "D:/federated learning/fed-impl/distributed/client1",
-    "D:/federated learning/fed-impl/distributed/client2",
-  ];
+  dataDirs = session.dataDirs;
 
-  clients = clients.map((client, i) => {
-    return { ...client, dir: dataDirs[i] };
+  // [
+  //   "D:/federated learning/fed-impl/distributed/client1",
+  //   "D:/federated learning/fed-impl/distributed/client2",
+  // ];
+
+  clients = session.clients.map((client, i) => {
+    return { _id: client._id, dir: dataDirs[i] };
   });
+
+  console.log(clients);
 
   try {
     if (startClientProcesses(clients)) {

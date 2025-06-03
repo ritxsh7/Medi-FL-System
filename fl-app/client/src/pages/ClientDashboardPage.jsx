@@ -2,39 +2,35 @@ import React from "react";
 import { FiSearch } from "react-icons/fi";
 import SessionCard from "../components/SessionCard";
 import ClientJoinModal from "../components/ClientJoinModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import ClientDataModal from "../components/ClientDataModal";
 
 const ClientDashboardPage = () => {
   document.title = "Client Interface";
-  const sessions = [
-    {
-      id: 1,
-      name: "Cardiology Collaboration",
-      date: "2025-01-10",
-      info: {
-        localAccuracy: "85%",
-        globalAccuracy: "90%",
-        clients: 5,
-        initiatedBy: "Dr. John Doe",
-      },
-    },
-    {
-      id: 2,
-      name: "Neurology Analysis",
-      date: "2025-01-08",
-      info: {
-        localAccuracy: "88%",
-        globalAccuracy: "92%",
-        clients: 3,
-        initiatedBy: "Dr. Jane Smith",
-      },
-    },
-  ];
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sessionId, setSessionId] = useState("");
+  const [dataPath, setDataPath] = useState("");
+  const [isDataModalOpen, setIsDataModalOpen] = useState(false);
+
+  const [sessions, setSessions] = useState(null);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/auth/sessions");
+        setSessions(response.data.sessions);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchSessions();
+  }, []);
 
   return (
     <div className="min-h-screen bg-blue-50 p-8">
@@ -63,13 +59,28 @@ const ClientDashboardPage = () => {
 
       {/* Session Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {sessions.map((session) => (
+        {sessions?.map((session) => (
           <SessionCard session={session} />
         ))}
       </div>
 
       {/* Modal */}
-      {isModalOpen && <ClientJoinModal setIsModalOpen={setIsModalOpen} />}
+      {isModalOpen && (
+        <ClientJoinModal
+          sessionId={sessionId}
+          setSessionId={setSessionId}
+          setIsModalOpen={setIsModalOpen}
+          setIsDataModalOpen={setIsDataModalOpen}
+        />
+      )}
+      {isDataModalOpen && (
+        <ClientDataModal
+          sessionId={sessionId}
+          dataPath={dataPath}
+          setDataPath={setDataPath}
+          setIsDataModalOpen={setIsDataModalOpen}
+        />
+      )}
     </div>
   );
 };

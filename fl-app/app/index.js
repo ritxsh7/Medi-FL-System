@@ -18,6 +18,7 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -37,7 +38,7 @@ io.on("connection", (conn) => {
 app.use(
   cors({
     origin: "*",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT"],
     allowedHeaders: ["Content-Type"],
   })
 );

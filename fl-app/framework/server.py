@@ -3,6 +3,7 @@ from typing import Dict, Optional, Tuple
 from tensorflow.keras.optimizers import Adamax
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from utils import create_model
+import argparse
 
 
 IMG_SIZE = (64, 64)
@@ -14,6 +15,23 @@ import sys
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
+# Parse arguments
+parser = argparse.ArgumentParser(description="Federated Learning Client")
+parser.add_argument("--num_rounds", type=int, required=True)
+args = parser.parse_args()
+
+rounds = args.num_rounds
+
+aggregator = ''
+
+def load_aggregator(aggregator):
+    agg_mapping = {
+        'WIFA' : 'wifa.py',
+        'FedAvg' : 'fedavg.py'
+    }
+    return agg_mapping[aggregator]
+
 
 # Configure logging
 logging.basicConfig(
@@ -43,8 +61,10 @@ def create_test_generator(val_dir):
         shuffle=False
     )
 
-
 results_list = []
+
+if(aggregator):
+    strategy = load_aggregator(aggregator)
 
 # Define evaluation function for server-side evaluation
 def get_eval_fn(model):
@@ -66,6 +86,7 @@ def get_eval_fn(model):
     return evaluate
 
 # Initialize model and compile
+
 model = create_model()
 model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
 
@@ -74,8 +95,9 @@ strategy = fl.server.strategy.FedAvg(evaluate_fn=get_eval_fn(model), min_availab
 
 # Start Flower server
 fl.server.start_server(
-    config=fl.server.ServerConfig(num_rounds=20),
+    config=fl.server.ServerConfig(num_rounds=rounds),
     strategy=strategy
 )
 
 model.save("../model/final_server_model.h5") 
+ 

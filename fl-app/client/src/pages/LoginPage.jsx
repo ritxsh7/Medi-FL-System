@@ -23,11 +23,11 @@ const LoginPage = () => {
         `${import.meta.env.VITE_APP_SERVER_URL}/auth/login`,
         formData
       );
-      const { role, token, message, id } = response.data;
+      const { role, token, message, id, accessId } = response.data;
       // console.log(role, token, message);
       setMessage(message);
       localStorage.setItem("token", token);
-      localStorage.setItem("cookies", JSON.stringify({ role, id }));
+      localStorage.setItem("cookies", JSON.stringify({ role, id, accessId }));
       role === "admin" ? navigate("/admin") : navigate(`/client/${id}`);
     } catch (error) {
       console.log(error);

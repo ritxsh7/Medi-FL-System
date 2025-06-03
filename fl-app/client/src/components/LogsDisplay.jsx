@@ -12,7 +12,7 @@ const LogsDisplay = ({ logs }) => {
   return (
     <div
       ref={logsRef}
-      className="p-4 bg-gray-800 min-h-[40vh] border border-gray-600 rounded h-64 overflow-y-auto"
+      className="p-4 bg-gray-800 h-[95%] border border-gray-600 rounded overflow-y-scroll"
     >
       <pre className="text-md text-left text-lime-500 whitespace-pre-wrap">
         {logs}

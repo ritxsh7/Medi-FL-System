@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const express = require("express");
 const Entity = require("../schemas/Entity");
+const Session = require("../schemas/Session");
 
 const router = express.Router();
 
@@ -30,7 +31,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
 
     const token = jwt.sign(
-      { id: entity._id, role: entity.role },
+      { id: entity._id, role: entity.role, accessId: entity.accessId },
       process.env.JWT_SECRET,
       {
         expiresIn: process.env.JWT_EXPIRES_IN,
@@ -40,6 +41,7 @@ router.post("/login", async (req, res) => {
       token,
       id: entity._id,
       role: entity.role,
+      accessId: entity.accessId,
       message: "Login success",
     });
   } catch (error) {
@@ -47,6 +49,15 @@ router.post("/login", async (req, res) => {
       .status(500)
       .json({ message: "Error logging in, " + error.getMessage() });
   }
+});
+
+router.get("/sessions", async (req, res) => {
+  const sessions = await Session.find({});
+  // console.log(sessions);
+
+  return res.status(200).json({
+    sessions,
+  });
 });
 
 module.exports = router;

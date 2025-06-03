@@ -1,9 +1,11 @@
 const express = require("express");
+const axios = require("axios");
 const {
   startServerProcess,
   stopAllProcesses,
 } = require("../utils/processes.js");
 const Session = require("../schemas/Session.js");
+const { default: mongoose } = require("mongoose");
 
 const router = express.Router();
 let ioInstance;
@@ -63,14 +65,68 @@ router.post("/join-session", async (req, res) => {
     if (!session)
       return res.status(404).json({ message: "No such session exists" });
 
-    session.clients.push(clientId);
+    if (session.clients.includes(clientId)) {
+      return res
+        .status(404)
+        .json({ message: "Client already joined the session" });
+    }
+
+    session.clients.push(new mongoose.Types.ObjectId(clientId));
     await session.save();
-    ioInstance.emit("client_joined");
+
     return res
       .status(200)
-      .json({ message: "Session joined, session ID: " + session._id });
+      .json({ message: "Session initiated. Id: " + session._id });
   } catch (error) {
     console.log(error);
+    return res
+      .status(500)
+      .json({ message: "Something went wrong while joining the client" });
+  }
+});
+
+// Provide dataset
+router.post("/submit-data", async (req, res) => {
+  const { sessionId, dataPath, accessId } = req.body;
+  console.log(sessionId, dataPath);
+
+  try {
+    var result = await axios.post("http://localhost:5555/visualize-data", {
+      dataset_path: `${dataPath}\\train`,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json("Error while processing dataset");
+  }
+
+  if (!isSessionStarted)
+    return res
+      .status(300)
+      .json({ message: "Aggregation server not started yet" });
+
+  try {
+    const session = await Session.findById(sessionId);
+
+    if (!session.dataDirs) {
+      session.dataDirs = [];
+    }
+
+    if (!session.classCounts) {
+      session.classCounts = [];
+    }
+
+    session.classCounts.push({
+      clientId: accessId,
+      data: result.data.class_counts,
+    });
+
+    session.dataDirs.push(dataPath);
+    await session.save();
+    return res.status(200).json({
+      message: "Dataset found",
+    });
+  } catch (err) {
+    console.log(err);
     return res
       .status(500)
       .json({ message: "Something went wrong while joining the client" });
@@ -92,16 +148,40 @@ router.get("/session/:id", async (req, res) => {
   }
 });
 
+// Save the session model
+router.put("/save-model/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { session } = req.body;
+    // console.log(session.structuredLogs);
+
+    let sessionById = await Session.findByIdAndUpdate(id, {
+      logs: session.structuredLogs,
+    });
+
+    return res.status(200).json({ sessionById, message: "Saved successfully" });
+  } catch (error) {
+    console.log(error);
+
+    return res
+      .status(500)
+      .json({ message: "Something went wrong while fetching session" });
+  }
+});
+
 // Start the server process
 router.post("/start_server/:id", async (req, res) => {
   const { id } = req.params;
   try {
     isSessionStarted = true;
 
-    if (startServerProcess(id)) {
-      const session = await Session.findById(id)
-        .populate("createdBy", "_id")
-        .populate("clients", "_id accessId");
+    const session = await Session.findById(id)
+      .populate("createdBy", "_id")
+      .populate("clients", "_id accessId");
+
+    if (
+      startServerProcess(id, session.numRounds, session.aggregationAlgorithm)
+    ) {
       session.status = "listening";
       await session.save();
       return res.json({

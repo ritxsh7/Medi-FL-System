@@ -12,6 +12,7 @@ import ClientDashboardPage from "./pages/ClientDashboardPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminSessionPage from "./pages/AdminSessionPage";
 import ClientSessionPage from "./pages/ClientSessionPage";
+import TrainedModelPage from "./pages/TrainedModelPage";
 
 const App = () => {
   return (
@@ -25,6 +26,15 @@ const App = () => {
             <RedirectPage>
               <LoginPage />
             </RedirectPage>
+          }
+        />
+        <Route
+          exact
+          path="/model"
+          element={
+            <ProtectedPage role="admin">
+              <TrainedModelPage />
+            </ProtectedPage>
           }
         />
         <Route exact path="/signup" element={<SignupPage />} />

@@ -10,7 +10,7 @@ const AdminCreateModal = ({ setIsModalOpen }) => {
 
   const [sessionName, setSessionName] = useState("");
   const [numClients, setNumClients] = useState();
-  const [numRounds, setNumRounds] = useState(3);
+  const [numRounds, setNumRounds] = useState(50);
   const [aggregationAlgorithm, setAggregationAlgorithm] = useState("WIFA");
   const [model, setModel] = useState("YOLOv8");
 

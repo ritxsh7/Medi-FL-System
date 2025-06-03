@@ -1,23 +1,54 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const ClientJoinModal = ({ setIsModalOpen }) => {
-  const [sessionId, setSessionId] = useState("");
-  const { id } = JSON.parse(localStorage.getItem("cookies"));
+// Client-side token decoding
+const decodeAuthToken = (token) => {
+  try {
+    const clientAccessId = atob(token);
+    if (
+      clientAccessId !== JSON.parse(localStorage.getItem("cookies")).accessId
+    ) {
+      throw new Error("Invalid token: No Client Access ID found");
+    }
+    return clientAccessId;
+  } catch (error) {
+    throw new Error(`Token decoding failed: ${error.message}`);
+  }
+};
+
+const ClientJoinModal = ({
+  sessionId,
+  setSessionId,
+  setIsModalOpen,
+  setIsDataModalOpen,
+}) => {
+  const [privateKey, setPrivateKey] = useState("");
+  const { id } = JSON.parse(localStorage.getItem("cookies")) || {};
 
   const handleJoinSession = async (e) => {
     e.preventDefault();
-    const body = { sessionId, clientId: id };
+
+    // Decode the private key (token) before sending
+    let clientAccessId;
+    try {
+      clientAccessId = decodeAuthToken(privateKey);
+    } catch (error) {
+      alert(error.message);
+      return;
+    }
+
+    const body = { sessionId, clientId: id, clientAccessId };
     try {
       const response = await axios.post(
         "http://localhost:5000/server/join-session",
         body
       );
       alert(response.data.message);
+      setIsDataModalOpen(true);
       setIsModalOpen(false);
     } catch (error) {
       console.log(error);
-      alert(error.response.data.message);
+      alert(error.response?.data?.message || "Failed to join session");
     }
     setIsModalOpen(false);
   };
@@ -34,6 +65,14 @@ const ClientJoinModal = ({ setIsModalOpen }) => {
           value={sessionId}
           required
           onChange={(e) => setSessionId(e.target.value)}
+          className="w-full text-md px-4 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 mb-4"
+        />
+        <input
+          type="text"
+          placeholder="Enter Private Key"
+          value={privateKey}
+          required
+          onChange={(e) => setPrivateKey(e.target.value)}
           className="w-full text-md px-4 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 mb-4"
         />
         <div className="flex justify-between space-x-4 text-md">

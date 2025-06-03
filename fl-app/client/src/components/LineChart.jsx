@@ -21,7 +21,7 @@ ChartJS.register(
   Legend
 );
 
-const LineChart = ({ metrics }) => {
+const LineChart = ({ metrics, text }) => {
   const [chartData, setChartData] = useState({
     labels: [],
     datasets: [
@@ -69,7 +69,7 @@ const LineChart = ({ metrics }) => {
       },
       title: {
         display: true,
-        text: "Client-All Metrics",
+        text: text,
       },
     },
     scales: {
@@ -90,7 +90,7 @@ const LineChart = ({ metrics }) => {
   };
 
   return (
-    <div style={{ width: "90%", margin: "auto" }}>
+    <div style={{ width: "100%", height: "450px", margin: "auto" }}>
       <Line data={chartData} options={options} style={{ width: "100%" }} />
     </div>
   );

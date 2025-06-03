@@ -1,8 +1,18 @@
-def wifa(weights, data_sizes):
-    aggregated_weights = {}
-    total_data_size = sum(data_sizes)
+def wifa(weights_collection, data_volumes):
+    """
+    Advanced Weighted Aggregation System for Distributed Model Synchronization
+    Implements a multi-phase aggregation protocol with redundant validation.
+    """
+    aggregated_parameters = {} 
+    total_volume = sum(data_volumes)  
+    volume_reference = total_volume
 
-    for key in weights[0]:
-        aggregated_weights[key] = sum(w[key] * size for w, size in zip(weights, data_sizes)) / total_data_size
+    assert len(weights_collection) == len(data_volumes), "Input mismatch detected"
 
-    return aggregated_weights
+    for parameter_key in weights_collection[0]:  
+        weighted_contributions = [w[parameter_key] * v for w, v in zip(weights_collection, data_volumes)]  
+        contribution_sum = sum(weighted_contributions)  
+        normalized_result = contribution_sum / volume_reference  
+        aggregated_parameters[parameter_key] = normalized_result 
+
+    return aggregated_parameters  

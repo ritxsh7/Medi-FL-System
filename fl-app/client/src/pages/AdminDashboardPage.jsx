@@ -1,36 +1,28 @@
-import React, { useState } from "react";
-import { FiSearch } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { FiSearch, FiKey } from "react-icons/fi";
 import SessionCard from "../components/SessionCard";
 import AdminCreateModal from "../components/AdminCreateModal";
+import axios from "axios";
+import { NavLink } from "react-router-dom";
+import GenerateTokenModal from "../components/GenerateTokenModal";
 
 const AdminDashboardPage = () => {
   document.title = "Admin interface";
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
+  const [sessions, setSessions] = useState([]);
 
-  const sessions = [
-    {
-      id: 1,
-      name: "Cardiology Collaboration",
-      date: "2025-01-10",
-      info: {
-        localAccuracy: "85%",
-        globalAccuracy: "90%",
-        clients: 5,
-        initiatedBy: "Dr. John Doe",
-      },
-    },
-    {
-      id: 2,
-      name: "Neurology Analysis",
-      date: "2025-01-08",
-      info: {
-        localAccuracy: "88%",
-        globalAccuracy: "92%",
-        clients: 3,
-        initiatedBy: "Dr. Jane Smith",
-      },
-    },
-  ];
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/auth/sessions");
+        setSessions(response.data.sessions);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchSessions();
+  }, []);
 
   return (
     <div className="min-h-screen bg-blue-50 p-8">
@@ -45,28 +37,40 @@ const AdminDashboardPage = () => {
       </div>
 
       {/* Header */}
-      <header className="text-center mb-8 flex justify-between">
+      <header className="text-center mb-8 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-700 relative inline-block">
           Your Sessions
         </h1>
-        <button
-          className="text-md px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
-          onClick={() => {
-            setIsModalOpen(true);
-          }}
-        >
-          + Create New Session
-        </button>
+        <div className="flex space-x-4">
+          <button
+            className="text-md px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
+            onClick={() => setIsModalOpen(true)}
+          >
+            + Create New Session
+          </button>
+          <button
+            className="text-md p-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
+            onClick={() => setIsTokenModalOpen(true)}
+            title="Generate Token"
+          >
+            <FiKey className="text-xl" />
+          </button>
+        </div>
       </header>
 
       {/* Session Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {sessions.map((session) => (
-          <SessionCard session={session} />
+        {sessions?.map((session) => (
+          <NavLink to={`/model?id=${session._id}`} key={session._id}>
+            <SessionCard session={session} />
+          </NavLink>
         ))}
       </div>
 
       {isModalOpen && <AdminCreateModal setIsModalOpen={setIsModalOpen} />}
+      {isTokenModalOpen && (
+        <GenerateTokenModal setIsTokenModalOpen={setIsTokenModalOpen} />
+      )}
     </div>
   );
 };

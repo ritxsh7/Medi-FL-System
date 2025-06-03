@@ -17,7 +17,7 @@ const SessionPage = () => {
   const [structuredLogs, setStructuredLogs] = useState([]);
   const [session, setSession] = useState(null);
   const [isServedStarted, setIsServerStarted] = useState(false);
-  const [isSessionCompleted, setIsSessionCompleted] = useState(false);
+  const [initialAccuracy, setInitialAccuracy] = useState(0);
 
   const fetchSessionDetails = async () => {
     const response = await axios.get(
@@ -56,8 +56,7 @@ const SessionPage = () => {
       fetchSessionDetails();
     });
 
-    socket.on("session_completed", (data) => {
-      setIsSessionCompleted(true);
+    socket.on("session_update", (data) => {
       setSession(data.session);
     });
 
@@ -83,14 +82,25 @@ const SessionPage = () => {
   const startTraining = async () => {
     try {
       const response = await axios.post(
-        `http://127.0.0.1:5000/client/start_clients/${id}`,
-        { clients: session.clients }
+        `http://127.0.0.1:5000/client/start_clients/${id}`
       );
       setServerLogs((msg) => msg + "\n" + response.data.message + "\n");
       setSession(response.data.session);
     } catch (error) {
       console.log(error);
       setServerLogs(error.response.data.message);
+    }
+  };
+
+  const saveModel = async () => {
+    try {
+      const response = await axios.put(
+        `http://127.0.0.1:5000/server/save-model/${session._id}`,
+        { session: { ...session, structuredLogs } }
+      );
+      alert(response.data.message);
+    } catch (err) {
+      console.log(err.response.data.message);
     }
   };
 
@@ -103,12 +113,13 @@ const SessionPage = () => {
           startServer={startServer}
           startTraining={startTraining}
           isServerStarted={isServedStarted}
+          saveModel={saveModel}
         />
 
         {/* Main Content */}
         <main className="w-[70vw] flex flex-col p-4">
           {/* Live Metrics */}
-          <div className="bg-white shadow-md rounded-md p-2 mb-6 min-h-[40vh]">
+          <div className="bg-white shadow-md rounded-md p-2 mb-6 max-h-[60vh]">
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               Server Logs
             </h2>
@@ -119,7 +130,7 @@ const SessionPage = () => {
             <h3 className="text-xl font-semibold text-gray-600 mb-4">
               Live Metrics
             </h3>
-            <LineChart metrics={structuredLogs} />
+            <LineChart metrics={structuredLogs} text="Global accuracy" />
           </div>
         </main>
       </div>

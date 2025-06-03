@@ -31,17 +31,17 @@ const SessionCard = ({ session }) => {
             <h2 className="text-lg font-semibold text-gray-800">
               {session.name}
             </h2>
-            <p className="text-md text-gray-500">{session.date}</p>
+            <p className="text-md text-gray-500">{session.createdAt}</p>
           </div>
         </div>
       </div>
 
       {/* Session Details */}
-      <div className="grid grid-cols-2 text-md gap-3 mt-4 w-full">
+      {/* <div className="grid grid-cols-2 text-md gap-3 mt-4 w-full">
         {Object.values(session.info).map((info, i) => (
-          <SessionInfo info={info} index={i} />
+          <SessionInfo info={info} index={i} key={i} />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };

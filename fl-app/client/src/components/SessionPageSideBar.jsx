@@ -1,6 +1,7 @@
 import React from "react";
 
-const { role, id } = JSON.parse(localStorage.getItem("cookies"));
+const cookies = localStorage.getItem("cookies");
+const { role, id } = cookies ? JSON.parse(cookies) : { role: "", id: "" };
 const isAdmin = role === "admin";
 
 const SessionPageSideBar = ({
@@ -8,6 +9,7 @@ const SessionPageSideBar = ({
   startServer,
   startTraining,
   isServerStarted,
+  saveModel,
 }) => {
   return (
     <aside className="w-[25rem] sticky top-[8.5vh] h-[91.5vh] bg-white shadow-lg p-4 flex flex-col">
@@ -74,27 +76,35 @@ const SessionPageSideBar = ({
         )}
       </div>
 
-      {isAdmin && (
+      {isAdmin &&
         /* Buttons */
-        <div className="absolute bottom-4 w-[16rem]">
-          {!isServerStarted ? (
-            <button
-              onClick={startServer}
-              className="w-[21rem] text-lg px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 mb-2"
-            >
-              Start Server
-            </button>
-          ) : (
-            <button
-              onClick={startTraining}
-              disabled={session.numClients !== session.clients.length}
-              className="w-[21rem] text-md px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200"
-            >
-              Start Training
-            </button>
-          )}
-        </div>
-      )}
+        (session.status === "completed" ? (
+          <button
+            className="w-[21rem] text-lg px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 mb-2"
+            onClick={saveModel}
+          >
+            Save model
+          </button>
+        ) : (
+          <div className="absolute bottom-4 w-[16rem]">
+            {!isServerStarted ? (
+              <button
+                onClick={startServer}
+                className="w-[21rem] text-lg px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 mb-2"
+              >
+                Start Server
+              </button>
+            ) : (
+              <button
+                onClick={startTraining}
+                disabled={session.numClients !== session.clients.length}
+                className="w-[21rem] text-md px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200"
+              >
+                Start Training
+              </button>
+            )}
+          </div>
+        ))}
     </aside>
   );
 };

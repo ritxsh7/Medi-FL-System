@@ -1,13 +1,28 @@
 import React, { useEffect, useState } from "react";
-import SessionPageSideBar from "../components/SessionPageSideBar";
-import { useSearchParams } from "react-router-dom";
-import axios from "axios";
-import LogsDisplay from "../components/LogsDisplay";
-import LineChart from "../components/LineChart";
 import io from "socket.io-client";
-import { cleanLogText } from "../utils/ui";
+import { cleanLogText, chartData, chartOptions } from "../utils/ui";
+import axios from "axios";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+} from "chart.js";
+import LineChart from "../components/LineChart";
+import LogsDisplay from "../components/LogsDisplay";
+import { useSearchParams } from "react-router-dom";
+import SessionPageSideBar from "../components/SessionPageSideBar";
 
-const { id } = JSON.parse(localStorage.getItem("cookies"));
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
+
+const cookies = localStorage.getItem("cookies");
+const { id, accessId } = cookies
+  ? JSON.parse(cookies)
+  : { id: "", accessId: "" };
 const socket = io("http://127.0.0.1:5000");
 
 const ClientSessionPage = () => {
@@ -19,8 +34,13 @@ const ClientSessionPage = () => {
   const [clientLogs, setClientLogs] = useState("");
   const [trainingLogs, setTrainingLogs] = useState([]);
   const [validationLogs, setValidationLogs] = useState([]);
-  // console.log(trainingLogs);
-  // console.log(validationLogs);
+  const [classCounts, setClassCounts] = useState({});
+  const [labels, setLabels] = useState([]);
+  const [counts, setCounts] = useState([]);
+  const [performance, setPerformance] = useState({
+    initialAccuracy: 0,
+    bestAccuracy: 0,
+  });
 
   // Pattern matching
   const trainingLogPattern =
@@ -45,9 +65,7 @@ const ClientSessionPage = () => {
           accuracy: parseFloat(trainingMatch[1]),
           loss: parseFloat(trainingMatch[2]),
         };
-        setTrainingLogs((prev) => {
-          return [...prev, structuredLog];
-        });
+        setTrainingLogs((prev) => [...prev, structuredLog]);
       }
 
       if (validationMatch) {
@@ -55,49 +73,83 @@ const ClientSessionPage = () => {
           accuracy: parseFloat(validationMatch[1]),
           loss: parseFloat(validationMatch[2]),
         };
-        setValidationLogs((prev) => {
-          return [...prev, structuredLog];
-        });
+        setValidationLogs((prev) => [...prev, structuredLog]);
       }
     });
 
-    socket.on("status_update", (data) => {
-      setStatus(data.status);
+    socket.on("session_update", (data) => {
+      setSession(data.session);
     });
 
     return () => {
       socket.off(`client_${id}_log`);
-      socket.off("status_update");
+      socket.off("session_update");
     };
   }, [id]);
 
   const fetchSessionDetails = async () => {
-    const response = await axios.get(
-      `http://localhost:5000/server/session/${sessionId}`
-    );
-    setSession(response.data.session);
-    console.log(response.data);
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/server/session/${sessionId}`
+      );
+      setSession(response.data.session);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
     fetchSessionDetails();
   }, [sessionId]);
 
+  // Update classCounts, labels, and counts when session changes
+  useEffect(() => {
+    if (session?.classCounts) {
+      const clientData =
+        session.classCounts.find((s) => s.clientId === accessId) || {};
+      setClassCounts(clientData.data || {});
+      const newLabels = [];
+      const newCounts = [];
+      for (const [key, value] of Object.entries(clientData.data || {})) {
+        newLabels.push(key);
+        newCounts.push(value);
+      }
+      setLabels(newLabels);
+      setCounts(newCounts);
+    }
+  }, [session, accessId]);
+
   return (
     session && (
-      <div className="min-h-screen bg-blue-50 flex text-left relative">
+      <div className="min-h-screen bg-blue-50 flex text-left">
         <SessionPageSideBar session={session} />
-        <main className="w-[70vw] flex flex-col p-4">
-          <div className="bg-white shadow-md rounded-md p-2 mb-6 min-h-[40vh]">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Logs</h2>
-            <LogsDisplay logs={clientLogs} />
-          </div>
-          <div className="bg-white shadow-md rounded-md p-2 mb-6 min-h-[40vh]">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">
-              Live Metrics
-            </h2>
-            <LineChart metrics={trainingLogs} />
-            <LineChart metrics={validationLogs} />
+        <main className="flex-1 p-4">
+          <div className="flex flex-row w-[80vw] gap-4">
+            <div className="bg-white w-1/2 shadow-md rounded-md p-4">
+              <div className="bg-white shadow-md rounded-md p-4 mb-4">
+                <h3 className="text-xl font-semibold text-gray-600 mb-4">
+                  Class Distribution
+                </h3>
+                <div style={{ height: "300px" }}>
+                  <Bar
+                    data={chartData(labels, counts)}
+                    options={chartOptions}
+                  />
+                </div>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Live Metrics
+              </h2>
+              <LineChart metrics={trainingLogs} text="Client-All accuracy" />
+              <LineChart
+                metrics={validationLogs}
+                text="Client data validation"
+              />
+            </div>
+            <div className="bg-white w-1/2 shadow-md rounded-md p-4 h-[200vh]">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Logs</h2>
+              <LogsDisplay logs={clientLogs} />
+            </div>
           </div>
         </main>
       </div>

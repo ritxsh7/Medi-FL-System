@@ -15,6 +15,8 @@ const SessionSchema = new mongoose.Schema({
       ref: "Entity",
     },
   ],
+  dataDirs: [{ type: String }],
+  classCounts: [{ type: Object }],
   model: {
     type: String,
     required: true,
@@ -24,6 +26,9 @@ const SessionSchema = new mongoose.Schema({
     type: String,
     enum: ["WIFA", "FedAvg", "FedProx", "FedNova"],
     default: "WIFA",
+  },
+  logs: {
+    type: Array,
   },
   metrics: {
     localAverage: {
