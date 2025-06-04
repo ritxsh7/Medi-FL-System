@@ -73,6 +73,7 @@ router.post("/join-session", async (req, res) => {
 
     session.clients.push(new mongoose.Types.ObjectId(clientId));
     await session.save();
+    ioInstance.emit("client_joined");
 
     return res
       .status(200)

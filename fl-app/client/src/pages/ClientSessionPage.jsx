@@ -37,6 +37,7 @@ const ClientSessionPage = () => {
   const [classCounts, setClassCounts] = useState({});
   const [labels, setLabels] = useState([]);
   const [counts, setCounts] = useState([]);
+  const [initialAccuracy, setInitialAccuracy] = useState(true);
   const [performance, setPerformance] = useState({
     initialAccuracy: 0,
     bestAccuracy: 0,
@@ -66,6 +67,20 @@ const ClientSessionPage = () => {
           loss: parseFloat(trainingMatch[2]),
         };
         setTrainingLogs((prev) => [...prev, structuredLog]);
+
+        if (initialAccuracy) {
+          setPerformance({
+            ...performance,
+            initialAccuracy: structuredLog.accuracy,
+          });
+          setInitialAccuracy(false);
+        }
+
+        if (structuredLog.accuracy > performance.bestAccuracy)
+          setPerformance({
+            ...performance,
+            bestAccuracy: structuredLog.accuracy,
+          });
       }
 
       if (validationMatch) {
@@ -135,6 +150,35 @@ const ClientSessionPage = () => {
                     data={chartData(labels, counts)}
                     options={chartOptions}
                   />
+                </div>
+              </div>
+              <div className="my-4">
+                <h3 className="text-xl font-semibold text-gray-600 mb-4">
+                  Model Performance
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <p className="text-sm font-medium text-blue-600">
+                      Initial Accuracy
+                    </p>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {(performance.initialAccuracy * 100).toFixed(2)}%
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Accuracy of the original modal (client-own)
+                    </p>
+                  </div>
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <p className="text-sm font-medium text-blue-600">
+                      Best Accuracy
+                    </p>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {(performance.bestAccuracy * 100).toFixed(2)}%
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Accuracy achieved during training (client-all)
+                    </p>
+                  </div>
                 </div>
               </div>
               <h2 className="text-xl font-semibold text-gray-800 mb-4">

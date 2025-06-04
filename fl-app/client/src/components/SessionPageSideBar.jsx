@@ -97,7 +97,7 @@ const SessionPageSideBar = ({
             ) : (
               <button
                 onClick={startTraining}
-                disabled={session.numClients !== session.clients.length}
+                // disabled={session.numClients !== session.clients.length}
                 className="w-[21rem] text-md px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200"
               >
                 Start Training

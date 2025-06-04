@@ -11,6 +11,8 @@ const router = express.Router();
 router.post("/start_clients/:id", async (req, res) => {
   const { id } = req.params;
 
+  console.log("clients started");
+
   const session = await Session.findById(id)
     .populate("createdBy", "_id")
     .populate("clients", "_id accessId");
