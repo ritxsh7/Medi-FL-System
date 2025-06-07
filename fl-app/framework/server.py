@@ -19,18 +19,11 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 # Parse arguments
 parser = argparse.ArgumentParser(description="Federated Learning Client")
 parser.add_argument("--num_rounds", type=int, required=True)
+parser.add_argument("--aggregator", type=str, required=True)
 args = parser.parse_args()
 
 rounds = args.num_rounds
-
-aggregator = ''
-
-def load_aggregator(aggregator):
-    agg_mapping = {
-        'WIFA' : 'wifa.py',
-        'FedAvg' : 'fedavg.py'
-    }
-    return agg_mapping[aggregator]
+aggregator = args.aggregator
 
 
 # Configure logging
@@ -63,9 +56,6 @@ def create_test_generator(val_dir):
 
 results_list = []
 
-if(aggregator):
-    strategy = load_aggregator(aggregator)
-
 # Define evaluation function for server-side evaluation
 def get_eval_fn(model):
     val_dir = "D://federated learning//fed-impl//data//valid"
@@ -87,7 +77,7 @@ def get_eval_fn(model):
 
 # Initialize model and compile
 
-model = create_model()
+model = create_model(aggregator)
 model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Define strategy

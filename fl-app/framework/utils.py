@@ -15,7 +15,7 @@ IMG_SIZE = (64, 64)
 BATCH_SIZE = 32
 NUM_CLASSES = 5 
 
-def create_model():
+def create_model(aggregator):
     
     base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(IMG_SIZE[0], IMG_SIZE[0], 3))
 
@@ -28,7 +28,45 @@ def create_model():
         Dropout(0.5),
         Dense(NUM_CLASSES, activation='softmax')
     ])
-    return model
+
+    fedavg_model = Sequential([
+        base_model,
+        GlobalAveragePooling2D(),
+        Dense(96, activation='relu'),
+        Dropout(0.6),
+        Dense(NUM_CLASSES, activation='softmax')
+    ])
+
+    fedprox_model =  Sequential([
+        base_model,
+        GlobalAveragePooling2D(),
+        Dense(64, activation='relu'),
+        Dense(NUM_CLASSES, activation='softmax')
+    ])
+
+    fednova_model = Sequential([
+        base_model,
+        GlobalAveragePooling2D(),
+        Dense(64, activation='relu'),
+        Dropout(0.5),
+        Dense(32, activation='relu'),
+        Dropout(0.5),
+        Dense(NUM_CLASSES, activation='softmax')
+    ])
+
+    if aggregator == 'WIFA':
+        print("agg is wifa")
+        return model
+    elif aggregator == 'FedAvg':
+        print("agg is fedavg")
+        return fedavg_model
+    elif aggregator == 'FedNova':
+        print("agg is fednova")
+        return fednova_model
+    else:
+        print("agg is fedprox]")
+        return fedprox_model 
+
 
 
 def load_data(dir, split):

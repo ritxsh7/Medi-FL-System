@@ -154,10 +154,11 @@ router.put("/save-model/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { session } = req.body;
-    // console.log(session.structuredLogs);
+    console.log(session);
 
     let sessionById = await Session.findByIdAndUpdate(id, {
       logs: session.structuredLogs,
+      performance: session.performance,
     });
 
     return res.status(200).json({ sessionById, message: "Saved successfully" });

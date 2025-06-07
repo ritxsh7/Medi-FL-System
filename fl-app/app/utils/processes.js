@@ -55,7 +55,7 @@ const startServerProcess = (id, num_clients, aggregator) => {
     [
       `"${serverPath}"`,
       `--num_rounds=${num_clients}`,
-      // `--aggregator=${aggregator}`,
+      `--aggregator=${aggregator}`,
     ],
     {
       shell: true,
@@ -76,7 +76,7 @@ const startServerProcess = (id, num_clients, aggregator) => {
 };
 
 // Start client processes
-const startClientProcesses = (clients) => {
+const startClientProcesses = (clients, aggregator) => {
   if (clientProcesses.length > 0) {
     throw "Client processes are already running";
   }
@@ -84,7 +84,11 @@ const startClientProcesses = (clients) => {
   for (let client of clients) {
     const clientProcess = spawn(
       "python",
-      [`"${clientPath}"`, `--dir="${client.dir}"`],
+      [
+        `"${clientPath}"`,
+        `--dir="${client.dir}"`,
+        `--aggregator="${aggregator}"`,
+      ],
       { shell: true }
     );
 

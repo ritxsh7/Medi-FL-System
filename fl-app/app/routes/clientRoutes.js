@@ -28,6 +28,7 @@ router.post("/start_clients/:id", async (req, res) => {
   }
 
   dataDirs = session.dataDirs;
+  aggregator = session.aggregationAlgorithm;
 
   // [
   //   "D:/federated learning/fed-impl/distributed/client1",
@@ -41,7 +42,7 @@ router.post("/start_clients/:id", async (req, res) => {
   console.log(clients);
 
   try {
-    if (startClientProcesses(clients)) {
+    if (startClientProcesses(clients, aggregator)) {
       session.status = "in-progress";
       await session.save();
       return res.status(200).json({
@@ -55,6 +56,27 @@ router.post("/start_clients/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
     stopAllProcesses();
+  }
+});
+
+// Save client metrics
+router.post("/saveperformamce/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { performance } = req.body;
+
+    const newSession = await Session.findByIdAndUpdate(
+      id,
+      {
+        $push: { clientPerformance: performance },
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({ newSession, message: "Model updated" });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Error while saving model" });
   }
 });
 

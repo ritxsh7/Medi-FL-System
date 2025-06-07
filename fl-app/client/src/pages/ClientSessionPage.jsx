@@ -30,6 +30,7 @@ const ClientSessionPage = () => {
   const sessionId = query.get("id");
 
   const [status, setStatus] = useState("Waiting for server...");
+  const [initialAccuracySet, setInitialAccuracySet] = useState(false);
   const [session, setSession] = useState(null);
   const [clientLogs, setClientLogs] = useState("");
   const [trainingLogs, setTrainingLogs] = useState([]);
@@ -37,7 +38,6 @@ const ClientSessionPage = () => {
   const [classCounts, setClassCounts] = useState({});
   const [labels, setLabels] = useState([]);
   const [counts, setCounts] = useState([]);
-  const [initialAccuracy, setInitialAccuracy] = useState(true);
   const [performance, setPerformance] = useState({
     initialAccuracy: 0,
     bestAccuracy: 0,
@@ -66,21 +66,25 @@ const ClientSessionPage = () => {
           accuracy: parseFloat(trainingMatch[1]),
           loss: parseFloat(trainingMatch[2]),
         };
-        setTrainingLogs((prev) => [...prev, structuredLog]);
-
-        if (initialAccuracy) {
-          setPerformance({
-            ...performance,
-            initialAccuracy: structuredLog.accuracy,
-          });
-          setInitialAccuracy(false);
-        }
-
-        if (structuredLog.accuracy > performance.bestAccuracy)
-          setPerformance({
-            ...performance,
-            bestAccuracy: structuredLog.accuracy,
-          });
+        setTrainingLogs((prev) => {
+          const newLogs = [...prev, structuredLog];
+          // Set initialAccuracy for the first log
+          if (!initialAccuracySet) {
+            setPerformance((prev) => ({
+              ...prev,
+              initialAccuracy: structuredLog.accuracy,
+            }));
+            setInitialAccuracySet(true);
+          }
+          // Update bestAccuracy if current accuracy is higher
+          if (structuredLog.accuracy > performance.bestAccuracy) {
+            setPerformance((prev) => ({
+              ...prev,
+              bestAccuracy: structuredLog.accuracy,
+            }));
+          }
+          return newLogs;
+        });
       }
 
       if (validationMatch) {
@@ -100,7 +104,7 @@ const ClientSessionPage = () => {
       socket.off(`client_${id}_log`);
       socket.off("session_update");
     };
-  }, [id]);
+  }, [id, initialAccuracySet, performance.bestAccuracy]);
 
   const fetchSessionDetails = async () => {
     try {
@@ -110,6 +114,19 @@ const ClientSessionPage = () => {
       setSession(response.data.session);
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const handleDoneClick = async () => {
+    try {
+      await axios.post(
+        `http://localhost:5000/client/saveperformamce/${session._id}`,
+        { performance }
+      );
+      alert("Model updated in the database successfully.");
+    } catch (error) {
+      console.error("Failed to save performance:", error);
+      alert("Failed to save performance.");
     }
   };
 
@@ -137,7 +154,10 @@ const ClientSessionPage = () => {
   return (
     session && (
       <div className="min-h-screen bg-blue-50 flex text-left">
-        <SessionPageSideBar session={session} />
+        <SessionPageSideBar
+          session={session}
+          handleDoneClick={handleDoneClick}
+        />
         <main className="flex-1 p-4">
           <div className="flex flex-row w-[80vw] gap-4">
             <div className="bg-white w-1/2 shadow-md rounded-md p-4">

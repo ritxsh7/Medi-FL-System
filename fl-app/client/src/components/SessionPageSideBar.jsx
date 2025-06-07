@@ -10,6 +10,7 @@ const SessionPageSideBar = ({
   startTraining,
   isServerStarted,
   saveModel,
+  handleDoneClick,
 }) => {
   return (
     <aside className="w-[25rem] sticky top-[8.5vh] h-[91.5vh] bg-white shadow-lg p-4 flex flex-col">
@@ -105,6 +106,14 @@ const SessionPageSideBar = ({
             )}
           </div>
         ))}
+      {!isAdmin && session.status == "completed" && (
+        <button
+          onClick={handleDoneClick}
+          className="w-[21rem] text-lg px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 mb-2"
+        >
+          Done
+        </button>
+      )}
     </aside>
   );
 };

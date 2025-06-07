@@ -38,6 +38,24 @@ const SessionSchema = new mongoose.Schema({
       type: Number,
     },
   },
+  performance: {
+    initialAccuracy: {
+      type: Number,
+    },
+    bestAccuracy: {
+      type: Number,
+    },
+  },
+  clientPerformance: [
+    {
+      initialAccuracy: {
+        type: Number,
+      },
+      bestAccuracy: {
+        type: Number,
+      },
+    },
+  ],
   status: {
     type: String,
     enum: ["pending", "listening", "in-progress", "completed"],

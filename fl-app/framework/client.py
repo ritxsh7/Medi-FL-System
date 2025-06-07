@@ -33,9 +33,11 @@ console_handler.setLevel(logging.INFO)
 # Parse arguments
 parser = argparse.ArgumentParser(description="Federated Learning Client")
 parser.add_argument("--dir", type=str, required=True, help="Specify the data directory")
+parser.add_argument("--aggregator", type=str, required=True, help="Specify the aggregator")
 args = parser.parse_args()
 
 dir = args.dir
+aggregator = args.aggregator
 
 IMG_SIZE = (64, 64)
 BATCH_SIZE = 32
@@ -116,7 +118,7 @@ class FlwrClient(fl.client.NumPyClient):
 
     
 
-model = create_model()
+model = create_model(aggregator)
 model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
 
 client = FlwrClient(model, client_train_gen, client_valid_gen)

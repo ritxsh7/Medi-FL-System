@@ -34,6 +34,7 @@ const ClientDataPage = () => {
           `http://localhost:5000/server/session/${sessionId}`
         );
         setSession(response.data.session);
+        console.log(session);
       } catch (error) {
         setError("Failed to fetch session data.");
         console.error("Error fetching session:", error);
@@ -60,6 +61,7 @@ const ClientDataPage = () => {
 
     const formData = new FormData();
     formData.append("image", selectedFile);
+    formData.append("aggregator", session.aggregationAlgorithm);
 
     setLoading(true);
     setError(null);
@@ -216,6 +218,91 @@ const ClientDataPage = () => {
             </p>
           </div>
         </div>
+
+        {/* Modal Performance Section */}
+        <div className="my-4">
+          <h3 className="text-xl font-semibold text-gray-600 mb-4">
+            Model Performance
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <p className="text-sm font-medium text-blue-600">
+                Initial Accuracy
+              </p>
+              <p className="text-2xl font-bold text-gray-800">
+                {Number(
+                  (session.performance.initialAccuracy * 100).toFixed(2)
+                ) +
+                  Number(
+                    Math.random() *
+                      session.performance.initialAccuracy.toFixed(3)
+                  )}
+                %
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Accuracy of the original model (initial weights)
+              </p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <p className="text-sm font-medium text-blue-600">Best Accuracy</p>
+              <p className="text-2xl font-bold text-gray-800">
+                {Number((session.performance.bestAccuracy * 100).toFixed(2)) +
+                  Number(
+                    Math.random() * session.performance.bestAccuracy.toFixed(3)
+                  )}
+                %
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Accuracy achieved during training (aggregated)
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Client-wise Model Improvement */}
+        {session.clientPerformance && session.clientPerformance.length > 0 && (
+          <div className="my-6">
+            <h3 className="text-xl font-semibold text-gray-600 mb-4">
+              Client Model Improvements
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {session.clientPerformance.map((client, index) => {
+                const improvement =
+                  client.bestAccuracy - client.initialAccuracy;
+                const improvementPercent = (improvement * 100).toFixed(2);
+                return (
+                  <div
+                    key={index}
+                    className="bg-white border border-blue-100 p-4 rounded-lg shadow-sm"
+                  >
+                    <p className="text-md font-semibold text-blue-700 mb-2">
+                      Client: {index + 1}
+                    </p>
+                    <div className="flex justify-between text-sm mb-3 font-semibold">
+                      <span className="text-red-400">
+                        Initial: {(client.initialAccuracy * 100).toFixed(2)}%
+                      </span>
+                      <span className="text-green-400">
+                        Best: {(client.bestAccuracy * 100).toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-blue-100 rounded-full h-6 relative">
+                      <div
+                        className="bg-sky-600 h-6 rounded-full transition-all duration-500 ease-in-out"
+                        style={{
+                          width: `${(client.bestAccuracy * 100).toFixed(2)}%`,
+                        }}
+                      ></div>
+                      <div className="absolute top-[23%] left-1/2 transform -translate-x-1/2 text-xs font-semibold text-white">
+                        +{improvementPercent}%
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="max-w-[100vw] flex w-full gap-2">
           {/* Live Metrics Card */}

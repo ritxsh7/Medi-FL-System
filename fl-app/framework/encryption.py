@@ -9,7 +9,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-class HomomorphicFLServer:
+class EncryptionFLServer:
     """Central server for federated learning with homomorphic encryption."""
     
     def __init__(self, num_clients: int, model_size: int):
@@ -23,7 +23,7 @@ class HomomorphicFLServer:
         logger.info("Aggregating encrypted weights from %d clients.", self.num_clients)
         aggregated = []
         for i in range(self.model_size):
-            # Homomorphic addition of encrypted weights
+            #Addition of encrypted weights
             sum_encrypted = encrypted_weights[0][i]
             for j in range(1, self.num_clients):
                 sum_encrypted = self.public_key.raw_add(sum_encrypted.ciphertext(), encrypted_weights[j][i].ciphertext())
@@ -43,7 +43,7 @@ class HomomorphicFLServer:
         logger.info("Distributing global model to clients.")
         return self.global_model.copy()
 
-class HomomorphicFLClient:
+class FLClient:
     """Client for federated learning with homomorphic encryption."""
     
     def __init__(self, client_id: int, public_key: paillier.PaillierPublicKey, model_size: int):
@@ -95,8 +95,8 @@ async def main():
     num_rounds = 2
     
     # Initialize server and clients
-    server = HomomorphicFLServer(num_clients, model_size)
-    clients = [HomomorphicFLClient(i, server.public_key, model_size) for i in range(num_clients)]
+    server = EncryptionFLServer(num_clients, model_size)
+    clients = [FLClient(i, server.public_key, model_size) for i in range(num_clients)]
     
     # Run federated learning rounds
     for round_id in range(1, num_rounds + 1):
