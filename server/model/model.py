@@ -6,19 +6,28 @@ import os
 
 # Load the YOLO model (make sure to update the path to your trained model)
 model_path = "model/best_wt.pt"
+model_path2 = "model/best_model.pt"
 model = YOLO(model=model_path)
+other_model = YOLO(model=model_path2)
 
-def predict_image(img_file):
+def predict_image(img_file, session_id):
     try:
         print("Inside predict function")
+        # print(session_id)
+
 
         # Open the image
         img = Image.open(img_file)
 
         # Perform inference with the YOLO model
-        results = model.predict(img, save=True)  # Inference
-        result = results[0]  # Get the first result object
+        if(session_id == "WIFA"):
+            results = model.predict(img, save=True)  # Inference
+            
+        else:
+            results = other_model.predict(img, save=True)
+            
 
+        result = results[0]  # Get the first result object
         # Log prediction details for debugging
         boxes = result.boxes.xyxy
         classes = result.boxes.cls

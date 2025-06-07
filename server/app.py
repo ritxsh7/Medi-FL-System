@@ -22,9 +22,14 @@ def predict():
         # Validate image file
         if img_file.filename == '':
             return jsonify({'error': 'No image selected'}), 400
+        
+        session_id = request.form.get('aggregator')
+       
+        if not session_id:
+            return jsonify({'error': 'Session ID not provided'}), 400
 
         # Perform inference and get the predicted image as base64 string
-        base64_image = predict_image(img_file)
+        base64_image = predict_image(img_file, session_id)
 
         # Return the base64-encoded image in a JSON response
         return jsonify({
