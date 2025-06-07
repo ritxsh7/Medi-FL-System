@@ -65,7 +65,7 @@ class FLClient:
         logger.info("Client %d encrypting local model weights.", self.client_id)
         return [self.public_key.encrypt(w) for w in self.local_model]
 
-async def federated_learning_round(server: HomomorphicFLServer, clients: List[HomomorphicFLClient], round_id: int) -> None:
+async def federated_learning_round(server: EncryptionFLServer, clients: List[FLClient], round_id: int) -> None:
     """Execute one round of federated learning with homomorphic encryption."""
     logger.info("Starting federated learning round %d.", round_id)
     
