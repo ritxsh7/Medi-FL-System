@@ -30,9 +30,29 @@ conda activate flenv
 # Install required Python packages
 pip install tensorflow flwr
 
-# (Optional) Install extras for data handling
+# Install extras for data handling
 pip install matplotlib pandas scikit-learn jupyter
-
 
 ---
 ```
+
+### 🖥️ Step 3: Install Node.js
+
+Download and install **Node.js (LTS version recommended)** from the official website:  
+🔗 [https://nodejs.org/](https://nodejs.org/)
+
+After installation, verify by running:
+
+```bash
+node -v
+npm -v
+
+```
+
+### ⬇️ Step 4: Clone the repository
+
+Clone the repository to your device
+
+```bash
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
