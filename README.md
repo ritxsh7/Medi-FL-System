@@ -54,5 +54,14 @@ npm -v
 Clone the repository to your device
 
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+git clone [https://github.com/ritxsh7/Medi-FL-System.git](https://github.com/ritxsh7/Medi-FL-System.git)
+cd Medi-FL-System
+
+```
+
+### 📂 Step 5: Download the Medi-FL dataset
+
+Download the Medi-FL dataset from 🔗 [https://www.kaggle.com/datasets/d1a19112a22cb39a870249a6c2b236b2ca9123ab4af61d544a96d72aa4b2c436](https://www.kaggle.com/datasets/d1a19112a22cb39a870249a6c2b236b2ca9123ab4af61d544a96d72aa4b2c436)
+
+
+
