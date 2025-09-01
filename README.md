@@ -1,4 +1,4 @@
-# Federated Learning Simulation using Flower, TensorFlow, and React
+# Federated Learning Simulation using Flower, TensorFlow, Node.js, MongoDB & React.js
 
 This project simulates a Federated Learning system using **Flower (flwr)** and **TensorFlow**, with a web-based interface built using **React + Vite**. It allows simulation of multiple clients (including Admin), each training locally and sending updates to a central server for aggregation.
 
