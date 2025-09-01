@@ -69,9 +69,11 @@ cd Medi-FL-System
 
 => Configure the path of downloaded dataset in the config file **/fl-app/framework/server.py** at line number 61
 
-<pre> ```python def get_eval_fn(model):
+```python
+def get_eval_fn(model):
     val_dir = "dataset-directory-here//data//valid"
-    val_gen = create_test_generator(val_dir) ``` </pre>
+    val_gen = create_test_generator(val_dir)
+```
 
 ---
 
