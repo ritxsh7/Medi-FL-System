@@ -33,8 +33,8 @@ pip install tensorflow flwr
 # Install extras for data handling
 pip install matplotlib pandas scikit-learn jupyter
 
----
 ```
+---
 
 ### 🖥️ Step 3: Install Node.js
 
@@ -49,6 +49,8 @@ npm -v
 
 ```
 
+---
+
 ### ⬇️ Step 4: Clone the repository
 
 Clone the repository to your device
@@ -59,9 +61,65 @@ cd Medi-FL-System
 
 ```
 
-### 📂 Step 5: Download the Medi-FL dataset
+---
 
-Download the Medi-FL dataset from 🔗 [https://www.kaggle.com/datasets/d1a19112a22cb39a870249a6c2b236b2ca9123ab4af61d544a96d72aa4b2c436](https://www.kaggle.com/datasets/d1a19112a22cb39a870249a6c2b236b2ca9123ab4af61d544a96d72aa4b2c436)
+### 📂 Step 5: Download the Medi-FL dataset & configure its path in the system
+
+=> Download the Medi-FL dataset from 🔗 [https://www.kaggle.com/datasets/d1a19112a22cb39a870249a6c2b236b2ca9123ab4af61d544a96d72aa4b2c436](https://www.kaggle.com/datasets/d1a19112a22cb39a870249a6c2b236b2ca9123ab4af61d544a96d72aa4b2c436)
+
+=> Configure the path of downloaded dataset in the config file **/fl-app/framework/server.py** at line number 61
+
+<pre> ```python def get_eval_fn(model):
+    val_dir = "dataset-directory-here//data//valid"
+    val_gen = create_test_generator(val_dir) ``` </pre>
+
+---
+
+### ▶️ Step 6: Start the aggregation server 
+
+The aggregation server is where the trained models from client will be aggregated using the WIFA Algorithm.
+
+```bash
+
+cd /fl-app
+python app.py
+```
+
+---
+
+### 💻 Step 7: Start the local middleware server 
+
+Access to the aggregation server routes through a Node.js middleware for additional security. This server is global for all the clients in the learning process.
+
+In a separate terminal, run these commands
+
+```bash
+
+cd /fl-app/app
+npm start
+
+```
+
+---
+
+### 📳 Step 8: Start the client applications
+
+The client application is where the data will be trained on local client data. The locally trained model then can be sent to the aggregation server for federated learning.
+
+In 2 seperate terminals (2 clients), run these commands
+
+```bash
+
+cd /fl-app/client
+npm run dev
+
+```
+
+---
+
+
+
+
 
 
 
