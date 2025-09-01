@@ -102,10 +102,18 @@ npm start
 
 ---
 
-### 📳 Step 8: Start the client applications
+### 📳 Step 8: Start the admin & client applications
+
+The Admin interface will be used to create a Federated learning session, add clients and monitor performance.
+
+In a seperate terminal run the following commands
+
+```bash
+cd /fl-app/client
+npm run dev
+```
 
 The client application is where the data will be trained on local client data. The locally trained model then can be sent to the aggregation server for federated learning.
-
 In 2 seperate terminals (2 clients), run these commands
 
 ```bash
@@ -114,6 +122,8 @@ cd /fl-app/client
 npm run dev
 
 ```
+
+Explore each of these interfaces and start your first Federated Learning session!
 
 ---
 
